@@ -1,0 +1,115 @@
+@import "tailwindcss";
+
+/* ============================================================
+ * Theme tokens
+ * ------------------------------------------------------------
+ * `--color-accent-*` defines the app's single accent color scale.
+ * Tailwind v4 auto-generates utilities from these: bg-accent-600,
+ * text-accent-400, border-accent-700, ring-accent-400, etc.
+ *
+ * To re-theme the whole app, change ONLY this block.
+ * Currently set to orange (was emerald in the original prototype).
+ * ============================================================ */
+@theme {
+  --color-accent-50: oklch(0.98 0.02 60);
+  --color-accent-100: oklch(0.95 0.05 60);
+  --color-accent-200: oklch(0.89 0.09 60);
+  --color-accent-300: oklch(0.82 0.13 55);
+  --color-accent-400: oklch(0.75 0.16 50);
+  --color-accent-500: oklch(0.68 0.19 45);
+  --color-accent-600: oklch(0.60 0.19 40);
+  --color-accent-700: oklch(0.50 0.17 36);
+  --color-accent-800: oklch(0.42 0.14 32);
+  --color-accent-900: oklch(0.35 0.11 30);
+  --color-accent-950: oklch(0.22 0.07 28);
+}
+
+/* ============================================================
+ * Global styles (ported from the original single-file prototype)
+ * ============================================================ */
+body {
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  background-color: #020617; /* slate-950 */
+  color: #e2e8f0; /* slate-200 */
+}
+
+.anim-fade-in {
+  animation: fadeIn 0.35s ease-out;
+}
+.anim-fade-in-down {
+  animation: fadeInDown 0.4s ease-out;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dice-anim {
+  animation: diceBounce 0.5s infinite alternate;
+}
+@keyframes diceBounce {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-12px);
+  }
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #0f172a;
+}
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+/* Short windows: drop the locked full-height layout and let the whole page
+   scroll normally (the interior scroll regions would otherwise be too small). */
+@media (max-height: 739px) {
+  #app-root {
+    height: auto;
+    overflow: visible;
+  }
+  #app-root > header {
+    position: sticky;
+    top: 0;
+  }
+  #app-root [class~="flex-1"] {
+    flex: 0 1 auto;
+  }
+  #app-root [class~="min-h-0"] {
+    min-height: auto;
+  }
+  #app-root [class~="h-full"] {
+    height: auto;
+  }
+  #app-root [class*="max-h-"] {
+    max-height: none;
+  }
+  #app-root [class~="overflow-y-auto"] {
+    overflow: visible;
+  }
+}

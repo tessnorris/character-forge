@@ -1,0 +1,108 @@
+import { Card } from '../ui/Card';
+import { Button } from '../ui/Button';
+import { ABILITY_NAMES, ABILITY_BY_NAME } from '../../data/abilities';
+import { CLASSES_DATA } from '../../data/classes';
+import { finalScores } from '../../engine/derive';
+import type { Character } from '../../types/character';
+import type { ReactNode } from 'react';
+
+interface Step5Props {
+  character: Character;
+  onOpenInitiative: () => void;
+  onSave?: () => void;
+}
+
+const Field = ({ label, value }: { label: string; value: ReactNode }) => (
+  <div className="flex justify-between items-center border-b border-slate-800 py-2">
+    <span className="text-slate-500 uppercase text-xs tracking-wider">{label}</span>
+    <span className="text-lg font-bold text-accent-400">{value || '—'}</span>
+  </div>
+);
+
+export const Step5Sheet = ({ character, onOpenInitiative, onSave }: Step5Props) => {
+  const scores = finalScores(character);
+  const rolled = !!character.baseScores;
+
+  const classObj = CLASSES_DATA.find((c) => c.name === character.charClass);
+  const pkg = classObj?.packages.find((p) => p.id === character.equipmentPackageId);
+  const combinedEquipment: Record<string, number> = {};
+  if (pkg) {
+    Object.assign(combinedEquipment, pkg.items);
+    for (const [name, qty] of Object.entries(character.purchasedItems || {})) {
+      combinedEquipment[name] = (combinedEquipment[name] || 0) + qty;
+    }
+  }
+
+  return (
+    <Card className="overflow-hidden anim-fade-in">
+      <div className="bg-slate-800/80 p-5 border-b border-slate-700 flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-white">{character.name || 'Unnamed Adventurer'}</h2>
+          <p className="text-slate-400 text-sm">{[character.species, character.charClass].filter(Boolean).join(' · ') || 'Character Sheet'}</p>
+        </div>
+        <div className="flex gap-2 shrink-0">
+          {onSave && (
+            <Button variant="ghost" onClick={onSave}>
+              💾 Save
+            </Button>
+          )}
+          <Button onClick={onOpenInitiative}>⚔ Initiative</Button>
+        </div>
+      </div>
+
+      <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <Field label="Class" value={character.charClass} />
+          <Field label="Species" value={character.species} />
+          <Field label="Background" value={character.background} />
+        </div>
+        <div>
+          <h3 className="text-slate-400 uppercase text-xs tracking-wider mb-2">Ability Scores</h3>
+          {!rolled && <p className="text-slate-500 italic text-sm mb-2">Roll abilities in step 3 to see final scores.</p>}
+          <table className="w-full text-sm">
+            <thead className="text-slate-500 text-xs uppercase">
+              <tr>
+                <th className="text-left py-1">Ability</th>
+                <th className="text-center py-1">Base</th>
+                <th className="text-center py-1">Bonus</th>
+                <th className="text-center py-1">Final</th>
+              </tr>
+            </thead>
+            <tbody>
+              {ABILITY_NAMES.map((n) => {
+                const s = scores[n];
+                return (
+                  <tr key={n} className="border-t border-slate-800">
+                    <td className="py-1.5 text-slate-300">{ABILITY_BY_NAME[n].short}</td>
+                    <td className="py-1.5 text-center text-slate-400">{s.base == null ? '—' : s.base}</td>
+                    <td className={`py-1.5 text-center font-bold ${s.bonus > 0 ? 'text-accent-400' : 'text-slate-600'}`}>
+                      {s.bonus > 0 ? `+${s.bonus}` : '—'}
+                    </td>
+                    <td className="py-1.5 text-center text-lg font-bold text-white">{s.final == null ? '—' : s.final}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div className="p-6 border-t border-slate-800">
+        <h3 className="text-slate-400 uppercase text-xs tracking-wider mb-3">Equipment</h3>
+        {Object.keys(combinedEquipment).length === 0 ? (
+          <p className="text-slate-500 italic text-sm">No equipment selected.</p>
+        ) : (
+          <div className="flex flex-wrap gap-2">
+            {Object.entries(combinedEquipment)
+              .sort(([a], [b]) => a.localeCompare(b))
+              .map(([name, qty]) => (
+                <span key={name} className="bg-slate-800 border border-slate-700 text-slate-300 py-1 px-3 rounded-full text-sm">
+                  {name} <span className="text-slate-500">×{qty}</span>
+                </span>
+              ))}
+          </div>
+        )}
+      </div>
+    </Card>
+  );
+};
