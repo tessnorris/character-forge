@@ -1,13 +1,16 @@
+import { useId } from 'react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { ABILITY_NAMES, ABILITY_BY_NAME } from '../../data/abilities';
 import { CLASSES_DATA } from '../../data/classes';
 import { finalScores } from '../../engine/derive';
-import type { Character } from '../../types/character';
+import { emptyCharacterDetails } from '../../types/character';
+import type { Character, CharacterDetails } from '../../types/character';
 import type { ReactNode } from 'react';
 
 interface Step5Props {
   character: Character;
+  updateCharacter: (patch: Partial<Character>) => void;
   onOpenInitiative: () => void;
   onSave?: () => void;
 }
@@ -19,9 +22,42 @@ const Field = ({ label, value }: { label: string; value: ReactNode }) => (
   </div>
 );
 
-export const Step5Sheet = ({ character, onOpenInitiative, onSave }: Step5Props) => {
+const TextAreaField = ({
+  label,
+  value,
+  onChange,
+  placeholder,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder: string;
+}) => {
+  const id = useId();
+  return (
+    <div>
+      <label htmlFor={id} className="block text-sm font-medium text-slate-300 mb-1">
+        {label}
+      </label>
+      <textarea
+        id={id}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg p-2.5 focus:border-accent-500 outline-none resize-y min-h-[5rem]"
+      />
+    </div>
+  );
+};
+
+export const Step5Sheet = ({ character, updateCharacter, onOpenInitiative, onSave }: Step5Props) => {
   const scores = finalScores(character);
   const rolled = !!character.baseScores;
+  const details = character.details ?? emptyCharacterDetails();
+
+  const updateDetails = (patch: Partial<CharacterDetails>) => {
+    updateCharacter({ details: { ...details, ...patch } });
+  };
 
   const classObj = CLASSES_DATA.find((c) => c.name === character.charClass);
   const pkg = classObj?.packages.find((p) => p.id === character.equipmentPackageId);
@@ -102,6 +138,34 @@ export const Step5Sheet = ({ character, onOpenInitiative, onSave }: Step5Props) 
               ))}
           </div>
         )}
+      </div>
+
+      <div className="p-6 border-t border-slate-800 space-y-4">
+        <h3 className="text-slate-400 uppercase text-xs tracking-wider">Character Details</h3>
+        <TextAreaField
+          label="Background story"
+          value={details.backgroundDescription}
+          onChange={(v) => updateDetails({ backgroundDescription: v })}
+          placeholder="How did they get here? What shaped them?"
+        />
+        <TextAreaField
+          label="Physical description"
+          value={details.physicalDescription}
+          onChange={(v) => updateDetails({ physicalDescription: v })}
+          placeholder="Height, build, distinguishing features..."
+        />
+        <TextAreaField
+          label="Personality"
+          value={details.personality}
+          onChange={(v) => updateDetails({ personality: v })}
+          placeholder="Traits, ideals, bonds, flaws..."
+        />
+        <TextAreaField
+          label="Notes"
+          value={details.notes}
+          onChange={(v) => updateDetails({ notes: v })}
+          placeholder="Anything else worth remembering..."
+        />
       </div>
     </Card>
   );

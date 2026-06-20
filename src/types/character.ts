@@ -24,6 +24,25 @@ export interface GeneratedScore {
   kept: number[];
 }
 
+/** Free-text "flavor" fields — not used in any rules calculation, just
+ * notes the player records about who their character is. Grouped together
+ * (rather than flattened onto Character) so this can grow independently as
+ * more categories are added, and so older saves only need one optional
+ * field defaulted rather than several. */
+export interface CharacterDetails {
+  backgroundDescription: string; // backstory / how they got here
+  physicalDescription: string; // appearance
+  personality: string; // traits, ideals, bonds, flaws — free-form for now
+  notes: string; // anything else (DM notes, reminders, etc.)
+}
+
+export const emptyCharacterDetails = (): CharacterDetails => ({
+  backgroundDescription: '',
+  physicalDescription: '',
+  personality: '',
+  notes: '',
+});
+
 export interface Character {
   id: string;
 
@@ -45,6 +64,11 @@ export interface Character {
   // Step 4 — Equipment
   equipmentPackageId: string | null;
   purchasedItems: Record<string, number>; // shop item name -> quantity
+
+  // Step 5 — Free-text flavor fields. Optional so older persisted/imported
+  // characters (saved before this field existed) still parse; components
+  // reading this should fall back to emptyCharacterDetails().
+  details?: CharacterDetails;
 
   savedAt?: number; // epoch ms, set when saved to the roster
 }

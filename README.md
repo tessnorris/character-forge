@@ -21,24 +21,39 @@ npm run dev
 | `npm run test:watch`| Run tests in watch mode (re-runs on save — use this while developing) |
 | `npm run test:ui`   | Open Vitest's interactive browser UI for debugging tests     |
 
-Before pushing or opening a PR, all four of `lint`, `npx tsc --noEmit`, `test`,
-and `build` should pass clean.
+Before pushing or opening a PR, `lint`, `test`, and `build` should all pass
+clean. `npm run build` runs `tsc -b` in project mode, which is the
+authoritative type check — it has caught real type errors (e.g. DOM API
+overload narrowing in test files) that a quick `tsc --noEmit` against a
+single tsconfig missed, so don't treat `--noEmit` alone as sufficient before
+a commit.
 
 ## Project structure
 
 ```
 src/
-  types/       Domain types: Character (state) vs. content.ts (rules data shapes)
+  types/       Domain types: Character (state, incl. CharacterDetails
+               free-text fields) vs. content.ts (rules data shapes,
+               UserContent for homebrew)
   data/        Built-in D&D content: classes, species, backgrounds, equipment
-  engine/      Pure functions, no React/DOM: dice rolling, ability score
+  content/     Content registry: merges built-in data/ with user homebrew
+               (UserContent) into a single lookup surface for components
+  engine/      Pure functions, no React/DOM: dice rolling (chargen-specific
+               and general-purpose notation like "2d6+3"), ability score
                derivation, initiative comparison
-  state/       Persistence: localStorage load/save, versioned schema migration
+  state/       Persistence: localStorage load/save for both character/roster
+               state and homebrew content, each with its own versioned
+               schema and migration path
   components/
     ui/          Shared primitives: Card, Button, SelectInput, AbilityBadge
     builder/     The 5-step character builder (Identity -> Background ->
-                 Abilities -> Equipment -> Summary)
+                 Abilities -> Equipment -> Summary). Step 5 also hosts the
+                 free-text character detail fields.
     initiative/  Initiative tracker + tie-breaker modal
     roster/      Saved-character list, import/export
+    dice/        Standalone dice roller tab: quick dice, custom notation,
+                 d20 advantage/disadvantage, roll history
+    homebrew/    Homebrew content management (custom equipment for now)
   test/        Shared test setup and fixture factories (not test files
                themselves -- those live in __tests__/ next to the code
                they cover)

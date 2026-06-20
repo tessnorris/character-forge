@@ -163,7 +163,7 @@ function App() {
       case 4:
         return <Step4Equipment character={character} updateCharacter={updateCharacter} onJump={setStep} userContent={userContent} />;
       case 5:
-        return <Step5Sheet character={character} onOpenInitiative={openInitiative} onSave={saveCharacter} />;
+        return <Step5Sheet character={character} updateCharacter={updateCharacter} onOpenInitiative={openInitiative} onSave={saveCharacter} />;
       default:
         return null;
     }
