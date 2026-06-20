@@ -118,8 +118,64 @@ export interface InvocationDef {
   prerequisite?: string;
 }
 
+/**
+ * A species as one coherent record, mirroring ClassDef/BackgroundDef's
+ * named-field shape. `speciesFeatures1` carries whatever level-1 choices
+ * the species grants; species with no choices (fixed traits only) omit it
+ * entirely, the same way ClassDef.classFeatures1 is omitted for classes
+ * with nothing beyond skills.
+ */
 export interface SpeciesDef {
   name: string;
+  speciesFeatures1?: SpeciesFeatures1;
+}
+
+/** One option within a species's "choose 1 of N named ancestries" feature
+ * (Dragonborn's Draconic Ancestry, Goliath's Giant Ancestry) — a single,
+ * non-leveled grant with no follow-on spells at higher levels. */
+export interface AncestryOption {
+  name: string;
+  description: string;
+}
+
+/** A single leveled grant within a Lineage/Legacy option — e.g. "at level 1
+ * you know this cantrip and gain this trait; at level 3 you can cast this
+ * spell once per long rest without a slot; at level 5 likewise for this
+ * other spell." Mirrors how InvocationDef stores the full leveled
+ * Eldritch Invocation catalog even though only level 1 is pickable today. */
+export interface LineageGrant {
+  level: 1 | 3 | 5;
+  name: string; // spell or cantrip name
+  description: string;
+}
+
+/** One option within a species's "choose 1 of N named lineages" feature
+ * (Elf's Elven Lineage, Gnome's Gnomish Lineage, Tiefling's Fiendish
+ * Legacy) — a trait plus a cantrip at level 1, and for Elf/Tiefling a spell
+ * each at levels 3 and 5 (Gnome's lineages stop at level 1), each usable
+ * once per long rest without expending a spell slot. `grants` holds
+ * whichever leveled entries actually exist for this option — always
+ * starting with level 1, but not every lineage has a level 3 or 5 grant. */
+export interface LineageOption {
+  name: string;
+  traitDescription: string; // the non-spell trait granted at level 1 (e.g. Drow's darkvision range)
+  grants: LineageGrant[]; // at least the level-1 cantrip; level 3/5 entries only if the lineage has them
+}
+
+/**
+ * Level-1 species-granted choices. Each field is present only for species
+ * that actually grant that kind of choice: Ancestry (Dragonborn, Goliath),
+ * Lineage (Elf, Gnome, Tiefling — each also picks a spellcasting ability
+ * for their lineage spells), and Human's bonus skill + bonus Origin feat.
+ * Elf's bonus-skill choice is a separate, smaller pick (from a fixed
+ * 3-option list) from Human's (from any skill), so they're modeled as
+ * distinct optional fields rather than unified.
+ */
+export interface SpeciesFeatures1 {
+  ancestry?: { label: string; options: AncestryOption[] }; // "Draconic Ancestry" / "Giant Ancestry"
+  lineage?: { label: string; options: LineageOption[]; spellcastingAbilityOptions: AbilityId[] }; // "Elven Lineage" / "Gnomish Lineage" / "Fiendish Legacy"
+  bonusSkillOptions?: string[] | 'any'; // Elf: fixed 3-skill list; Human: 'any'
+  bonusFeat?: boolean; // Human only — bonus Origin feat of choice
 }
 
 /**
