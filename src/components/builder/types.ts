@@ -7,9 +7,10 @@ export interface StepProps {
 
 export const STEPS = [
   { n: 1, label: 'Identity' },
-  { n: 2, label: 'Background' },
-  { n: 3, label: 'Class' },
-  { n: 4, label: 'Abilities' },
-  { n: 5, label: 'Equipment' },
-  { n: 6, label: 'Summary' },
+  { n: 2, label: 'Class' },
+  { n: 3, label: 'Species' },
+  { n: 4, label: 'Background' },
+  { n: 5, label: 'Abilities' },
+  { n: 6, label: 'Equipment' },
+  { n: 7, label: 'Summary' },
 ] as const;

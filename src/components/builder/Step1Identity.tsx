@@ -49,7 +49,16 @@ export const Step1Identity = ({ character, updateCharacter }: StepProps) => {
         label="Species"
         options={SPECIES}
         value={character.species}
-        onChange={(v) => updateCharacter({ species: v })}
+        onChange={(v) =>
+          updateCharacter({
+            species: v,
+            speciesAncestry: undefined,
+            speciesLineage: undefined,
+            lineageSpellcastingAbility: undefined,
+            speciesBonusSkill: undefined,
+            speciesBonusFeat: undefined,
+          })
+        }
         placeholder="-- Select Species --"
       />
     </Card>

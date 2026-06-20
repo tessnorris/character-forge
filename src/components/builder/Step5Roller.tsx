@@ -8,7 +8,7 @@ import type { StepProps } from './types';
 type Phase = RollerState['phase'];
 type Mode = RollerState['mode'];
 
-export const Step3Roller = ({ character, updateCharacter }: StepProps) => {
+export const Step5Roller = ({ character, updateCharacter }: StepProps) => {
   // Restore the roller's full state so navigating back retains rolled scores.
   const saved = character.rollerState;
   const [numDice, setNumDice] = useState(saved?.numDice ?? 4);

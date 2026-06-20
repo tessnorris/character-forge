@@ -13,3 +13,6 @@ export const ABILITY_NAMES: string[] = ABILITIES.map((a) => a.name);
 export const ABILITY_BY_NAME: Record<string, AbilityDef> = Object.fromEntries(
   ABILITIES.map((a) => [a.name, a]),
 );
+export const ABILITY_BY_ID: Record<string, AbilityDef> = Object.fromEntries(
+  ABILITIES.map((a) => [a.id, a]),
+);

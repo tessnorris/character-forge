@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { useState } from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { Step5Sheet } from '../Step5Sheet';
+import { Step7Sheet } from '../Step7Sheet';
 import { makeCharacter } from '../../../test/factories';
 import type { Character } from '../../../types/character';
 
@@ -10,12 +10,12 @@ function renderStep5(initial: Partial<Character> = {}) {
   function Harness() {
     const [character, setCharacter] = useState<Character>(makeCharacter(initial));
     const updateCharacter = (patch: Partial<Character>) => setCharacter((prev) => ({ ...prev, ...patch }));
-    return <Step5Sheet character={character} updateCharacter={updateCharacter} onOpenInitiative={() => {}} />;
+    return <Step7Sheet character={character} updateCharacter={updateCharacter} onOpenInitiative={() => {}} />;
   }
   return render(<Harness />);
 }
 
-describe('Step5Sheet — character details', () => {
+describe('Step7Sheet — character details', () => {
   it('renders all four detail fields empty by default', () => {
     renderStep5();
     expect(screen.getByLabelText('Background story')).toHaveValue('');

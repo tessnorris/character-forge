@@ -1,15 +1,16 @@
 import { useId } from 'react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
-import { ABILITY_NAMES, ABILITY_BY_NAME } from '../../data/abilities';
+import { ABILITY_NAMES, ABILITY_BY_NAME, ABILITY_BY_ID } from '../../data/abilities';
 import { CLASSES_DATA } from '../../data/classes';
+import { SPECIES_DATA } from '../../data/species';
 import { BACKGROUNDS_BY_NAME } from '../../data/backgrounds';
 import { finalScores, proficientSkills } from '../../engine/derive';
 import { emptyCharacterDetails } from '../../types/character';
 import type { Character, CharacterDetails } from '../../types/character';
 import type { ReactNode } from 'react';
 
-interface Step5Props {
+interface Step7Props {
   character: Character;
   updateCharacter: (patch: Partial<Character>) => void;
   onOpenInitiative: () => void;
@@ -51,7 +52,7 @@ const TextAreaField = ({
   );
 };
 
-export const Step5Sheet = ({ character, updateCharacter, onOpenInitiative, onSave }: Step5Props) => {
+export const Step7Sheet = ({ character, updateCharacter, onOpenInitiative, onSave }: Step7Props) => {
   const scores = finalScores(character);
   const rolled = !!character.baseScores;
   const details = character.details ?? emptyCharacterDetails();
@@ -63,6 +64,7 @@ export const Step5Sheet = ({ character, updateCharacter, onOpenInitiative, onSav
   };
 
   const classObj = CLASSES_DATA.find((c) => c.name === character.charClass);
+  const speciesObj = SPECIES_DATA.find((s) => s.name === character.species);
   const pkg = classObj?.packages.find((p) => p.id === character.equipmentPackageId);
   const combinedEquipment: Record<string, number> = {};
   if (pkg) {
@@ -168,6 +170,42 @@ export const Step5Sheet = ({ character, updateCharacter, onOpenInitiative, onSav
           <div className="text-sm text-slate-400 mb-1">
             Eldritch Invocation: <span className="text-slate-200 font-medium">{character.invocation}</span>
           </div>
+        )}
+      </div>
+
+      <div className="p-6 border-t border-slate-800">
+        <h3 className="text-slate-400 uppercase text-xs tracking-wider mb-3">Species Traits</h3>
+        {!speciesObj?.speciesFeatures1 ? (
+          <p className="text-slate-500 italic text-sm">{character.species ? 'No species choices for this character.' : 'No species selected yet.'}</p>
+        ) : (
+          <>
+            {character.speciesAncestry && (
+              <div className="text-sm text-slate-400 mb-1">
+                {speciesObj.speciesFeatures1.ancestry?.label ?? 'Ancestry'}: <span className="text-slate-200 font-medium">{character.speciesAncestry}</span>
+              </div>
+            )}
+            {character.speciesLineage && (
+              <div className="text-sm text-slate-400 mb-1">
+                {speciesObj.speciesFeatures1.lineage?.label ?? 'Lineage'}: <span className="text-slate-200 font-medium">{character.speciesLineage}</span>
+                {character.lineageSpellcastingAbility && (
+                  <>
+                    {' '}
+                    (spellcasting: <span className="text-slate-200 font-medium">{ABILITY_BY_ID[character.lineageSpellcastingAbility]?.name ?? character.lineageSpellcastingAbility}</span>)
+                  </>
+                )}
+              </div>
+            )}
+            {character.speciesBonusSkill && (
+              <div className="text-sm text-slate-400 mb-1">
+                Bonus Skill: <span className="text-slate-200 font-medium">{character.speciesBonusSkill}</span>
+              </div>
+            )}
+            {character.speciesBonusFeat && (
+              <div className="text-sm text-slate-400 mb-1">
+                Bonus Origin Feat: <span className="text-slate-200 font-medium">{character.speciesBonusFeat}</span>
+              </div>
+            )}
+          </>
         )}
       </div>
 

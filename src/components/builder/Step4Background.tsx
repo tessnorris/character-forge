@@ -5,7 +5,7 @@ import { AbilityBadge } from '../ui/AbilityBadge';
 import { BACKGROUNDS } from '../../data/backgrounds';
 import type { StepProps } from './types';
 
-export const Step2Background = ({ character, updateCharacter }: StepProps) => {
+export const Step4Background = ({ character, updateCharacter }: StepProps) => {
   const bg = character.background;
   const abilities = bg ? BACKGROUNDS[bg] : [];
   const plus2Id = useId();

@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { Card } from '../ui/Card';
+import { ChipPicker, RadioCardPicker, SectionHeading } from '../ui/Pickers';
 import { CLASSES_DATA } from '../../data/classes';
 import { SKILL_NAMES } from '../../data/skills';
 import { BACKGROUNDS_BY_NAME } from '../../data/backgrounds';
@@ -23,85 +24,7 @@ const weaponsForPool = (pool: WeaponMasteryPool) => {
   }
 };
 
-/** A row of toggleable chips with an "(n of m selected)" counter. Used for
- * every checkbox-style picker on this step (skills, weapon mastery,
- * expertise) so the selection-limit behavior stays consistent. */
-const ChipPicker = ({
-  options,
-  selected,
-  max,
-  onToggle,
-}: {
-  options: string[];
-  selected: string[];
-  max: number;
-  onToggle: (value: string) => void;
-}) => (
-  <div className="flex flex-wrap gap-2">
-    {options.map((opt) => {
-      const isSelected = selected.includes(opt);
-      const isDisabled = !isSelected && selected.length >= max;
-      return (
-        <button
-          key={opt}
-          type="button"
-          disabled={isDisabled}
-          onClick={() => onToggle(opt)}
-          className={`px-3 py-1.5 rounded-lg border text-sm font-medium transition-colors ${
-            isSelected
-              ? 'border-accent-500 bg-accent-900/30 text-white'
-              : isDisabled
-                ? 'border-slate-800 text-slate-600 cursor-not-allowed'
-                : 'border-slate-700 text-slate-300 hover:border-accent-500 hover:text-white'
-          }`}
-        >
-          {opt}
-        </button>
-      );
-    })}
-  </div>
-);
-
-/** A vertical list of radio-style cards with name + description. Used for
- * every "choose exactly 1 of N named options" picker (Fighting Style,
- * Divine/Primal Order, Eldritch Invocation). */
-const RadioCardPicker = ({
-  options,
-  selected,
-  onSelect,
-}: {
-  options: { name: string; description: string }[];
-  selected: string;
-  onSelect: (name: string) => void;
-}) => (
-  <div className="space-y-2">
-    {options.map((opt) => {
-      const isSelected = selected === opt.name;
-      return (
-        <button
-          key={opt.name}
-          type="button"
-          onClick={() => onSelect(opt.name)}
-          className={`w-full text-left p-3 rounded-lg border transition-colors ${
-            isSelected ? 'border-accent-500 bg-accent-900/20' : 'border-slate-700 hover:border-slate-500'
-          }`}
-        >
-          <div className={`font-semibold ${isSelected ? 'text-white' : 'text-slate-200'}`}>{opt.name}</div>
-          <div className="text-sm text-slate-400 mt-0.5">{opt.description}</div>
-        </button>
-      );
-    })}
-  </div>
-);
-
-const SectionHeading = ({ title, hint }: { title: string; hint: string }) => (
-  <div className="mb-3">
-    <h3 className="font-semibold text-slate-200">{title}</h3>
-    <p className="text-sm text-slate-500">{hint}</p>
-  </div>
-);
-
-export const Step3Class = ({ character, updateCharacter }: StepProps) => {
+export const Step2Class = ({ character, updateCharacter }: StepProps) => {
   const classDef = CLASSES_DATA.find((c) => c.name === character.charClass);
   const bg = character.background ? BACKGROUNDS_BY_NAME[character.background] : null;
   const features = classDef?.classFeatures1;

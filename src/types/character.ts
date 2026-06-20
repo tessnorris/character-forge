@@ -51,13 +51,7 @@ export interface Character {
   charClass: string;
   species: string;
 
-  // Step 2 — Background
-  background: string;
-  bonusType: BonusType;
-  bonus2: string; // ability name receiving +2 (bonusType === '2-1')
-  bonus1: string; // ability name receiving +1
-
-  // Step 3 — Class features (skills + class-specific level-1 choices).
+  // Step 2 — Class features (skills + class-specific level-1 choices).
   // All optional/defaulted so older saved/imported characters (from before
   // this step existed) still parse without a migration.
   classSkills?: string[]; // class skill-choice picks (background's 2 fixed skills are derived, not stored here)
@@ -67,15 +61,29 @@ export interface Character {
   expertise?: string[]; // chosen skills for Rogue's Expertise (must be a subset of the character's proficient skills)
   invocation?: string; // chosen level-1 Eldritch Invocation name (Warlock only)
 
-  // Step 4 — Abilities
+  // Step 3 — Species features (ancestry/lineage choice, bonus skill/feat).
+  // All optional/defaulted so older saved/imported characters still parse.
+  speciesAncestry?: string; // chosen Draconic/Giant Ancestry name (Dragonborn/Goliath)
+  speciesLineage?: string; // chosen Lineage/Legacy option name (Elf/Gnome/Tiefling)
+  lineageSpellcastingAbility?: string; // chosen spellcasting ability for lineage spells ('int' | 'wis' | 'cha')
+  speciesBonusSkill?: string; // chosen bonus skill (Elf's 3-option pick, or Human's any-skill pick)
+  speciesBonusFeat?: string; // chosen bonus Origin feat (Human only)
+
+  // Step 4 — Background
+  background: string;
+  bonusType: BonusType;
+  bonus2: string; // ability name receiving +2 (bonusType === '2-1')
+  bonus1: string; // ability name receiving +1
+
+  // Step 5 — Abilities
   baseScores: Record<string, number> | null; // ability name -> rolled score
   rollerState?: RollerState;
 
-  // Step 5 — Equipment
+  // Step 6 — Equipment
   equipmentPackageId: string | null;
   purchasedItems: Record<string, number>; // shop item name -> quantity
 
-  // Step 6 — Free-text flavor fields. Optional so older persisted/imported
+  // Step 7 — Free-text flavor fields. Optional so older persisted/imported
   // characters (saved before this field existed) still parse; components
   // reading this should fall back to emptyCharacterDetails().
   details?: CharacterDetails;

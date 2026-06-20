@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { useState } from 'react';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { Step2Background } from '../Step2Background';
+import { Step4Background } from '../Step4Background';
 import { makeCharacter } from '../../../test/factories';
 import type { Character } from '../../../types/character';
 
@@ -10,24 +10,24 @@ import type { Character } from '../../../types/character';
  * and don't own state themselves. This wrapper holds the state exactly the way
  * App.tsx does, so tests exercise the real data flow rather than mocking
  * updateCharacter and asserting on call arguments. */
-function renderStep2(initial: Partial<Character> = {}) {
+function renderStep4(initial: Partial<Character> = {}) {
   function Harness() {
     const [character, setCharacter] = useState<Character>(makeCharacter(initial));
     const updateCharacter = (patch: Partial<Character>) => setCharacter((prev) => ({ ...prev, ...patch }));
-    return <Step2Background character={character} updateCharacter={updateCharacter} />;
+    return <Step4Background character={character} updateCharacter={updateCharacter} />;
   }
   return render(<Harness />);
 }
 
-describe('Step2Background', () => {
+describe('Step4Background', () => {
   it('shows no bonus-distribution panel until a background is chosen', () => {
-    renderStep2();
+    renderStep4();
     expect(screen.queryByText('Bonus distribution')).not.toBeInTheDocument();
   });
 
   it('selecting a background reveals its associated abilities as badges', async () => {
     const user = userEvent.setup();
-    renderStep2();
+    renderStep4();
 
     await user.selectOptions(screen.getByLabelText('Choose a Background'), 'Sage');
 
@@ -43,7 +43,7 @@ describe('Step2Background', () => {
 
   it('defaults to the 2-1 split with the background’s first two abilities', async () => {
     const user = userEvent.setup();
-    renderStep2();
+    renderStep4();
     await user.selectOptions(screen.getByLabelText('Choose a Background'), 'Sage');
 
     // 2-1 is selected by default, so both ability dropdowns should be visible.
@@ -53,7 +53,7 @@ describe('Step2Background', () => {
 
   it('switching to 1-1-1 mode shows the flat +1-to-all summary instead of dropdowns', async () => {
     const user = userEvent.setup();
-    renderStep2();
+    renderStep4();
     await user.selectOptions(screen.getByLabelText('Choose a Background'), 'Sage');
     await user.click(screen.getByRole('radio', { name: '+1 to all three' }));
 
@@ -64,7 +64,7 @@ describe('Step2Background', () => {
 
   it('disables the +1 option that is currently selected for +2 (and vice versa), preventing a duplicate pick', async () => {
     const user = userEvent.setup();
-    renderStep2({ background: 'Sage', bonusType: '2-1', bonus2: 'Intelligence', bonus1: 'Wisdom' });
+    renderStep4({ background: 'Sage', bonusType: '2-1', bonus2: 'Intelligence', bonus1: 'Wisdom' });
 
     const plus2 = screen.getByLabelText('+2 Ability') as HTMLSelectElement;
     const plus1 = screen.getByLabelText('+1 Ability') as HTMLSelectElement;
@@ -83,7 +83,7 @@ describe('Step2Background', () => {
 
   it('clearing the background resets the bonus selections', async () => {
     const user = userEvent.setup();
-    renderStep2({ background: 'Sage', bonusType: '2-1', bonus2: 'Intelligence', bonus1: 'Wisdom' });
+    renderStep4({ background: 'Sage', bonusType: '2-1', bonus2: 'Intelligence', bonus1: 'Wisdom' });
 
     await user.selectOptions(screen.getByLabelText('Choose a Background'), '-- Select Background --');
 

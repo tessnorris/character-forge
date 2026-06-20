@@ -2,11 +2,12 @@ import { useEffect, useMemo, useState } from 'react';
 import { Button } from './components/ui/Button';
 import { Stepper } from './components/builder/Stepper';
 import { Step1Identity } from './components/builder/Step1Identity';
-import { Step2Background } from './components/builder/Step2Background';
-import { Step3Class } from './components/builder/Step3Class';
-import { Step3Roller } from './components/builder/Step3Roller';
-import { Step4Equipment } from './components/builder/Step4Equipment';
-import { Step5Sheet } from './components/builder/Step5Sheet';
+import { Step2Class } from './components/builder/Step2Class';
+import { Step3Species } from './components/builder/Step3Species';
+import { Step4Background } from './components/builder/Step4Background';
+import { Step5Roller } from './components/builder/Step5Roller';
+import { Step6Equipment } from './components/builder/Step6Equipment';
+import { Step7Sheet } from './components/builder/Step7Sheet';
 import { InitiativeTracker } from './components/initiative/InitiativeTracker';
 import { RosterView } from './components/roster/RosterView';
 import { HomebrewView } from './components/homebrew/HomebrewView';
@@ -14,6 +15,7 @@ import { DiceRollerView } from './components/dice/DiceRollerView';
 import { uid, rollD20, getMod } from './engine/dice';
 import { finalScores } from './engine/derive';
 import { CLASSES_DATA } from './data/classes';
+import { SPECIES_DATA } from './data/species';
 import { loadState, saveState, loadUserContent, saveUserContent, extractImportedCharacters, PC_ID } from './state/storage';
 import { emptyUserContent } from './types/content';
 import type { UserContent } from './types/content';
@@ -80,7 +82,7 @@ function App() {
     const entry = roster.find((c) => c.id === id);
     if (!entry) return;
     setCharacter(JSON.parse(JSON.stringify(entry)));
-    setStep(6);
+    setStep(7);
     setView('builder');
   };
 
@@ -123,12 +125,24 @@ function App() {
     return true;
   };
 
+  const speciesDef = SPECIES_DATA.find((s) => s.name === character.species);
+  const speciesFeatures = speciesDef?.speciesFeatures1;
+  const speciesStepComplete = (): boolean => {
+    if (!speciesDef) return false;
+    if (speciesFeatures?.ancestry && !character.speciesAncestry) return false;
+    if (speciesFeatures?.lineage && (!character.speciesLineage || !character.lineageSpellcastingAbility)) return false;
+    if (speciesFeatures?.bonusSkillOptions && !character.speciesBonusSkill) return false;
+    if (speciesFeatures?.bonusFeat && !character.speciesBonusFeat) return false;
+    return true;
+  };
+
   const completed: Record<number, boolean> = {
     1: !!(character.charClass && character.species),
-    2: !!character.background,
-    3: classStepComplete(),
-    4: !!character.baseScores,
-    5: !!character.equipmentPackageId,
+    2: classStepComplete(),
+    3: speciesStepComplete(),
+    4: !!character.background,
+    5: !!character.baseScores,
+    6: !!character.equipmentPackageId,
   };
   const canEnter = (s: number) => {
     for (let i = 1; i < s; i++) if (!completed[i]) return false;
@@ -173,15 +187,17 @@ function App() {
       case 1:
         return <Step1Identity character={character} updateCharacter={updateCharacter} />;
       case 2:
-        return <Step2Background character={character} updateCharacter={updateCharacter} />;
+        return <Step2Class character={character} updateCharacter={updateCharacter} />;
       case 3:
-        return <Step3Class character={character} updateCharacter={updateCharacter} />;
+        return <Step3Species character={character} updateCharacter={updateCharacter} />;
       case 4:
-        return <Step3Roller character={character} updateCharacter={updateCharacter} />;
+        return <Step4Background character={character} updateCharacter={updateCharacter} />;
       case 5:
-        return <Step4Equipment character={character} updateCharacter={updateCharacter} onJump={setStep} userContent={userContent} />;
+        return <Step5Roller character={character} updateCharacter={updateCharacter} />;
       case 6:
-        return <Step5Sheet character={character} updateCharacter={updateCharacter} onOpenInitiative={openInitiative} onSave={saveCharacter} />;
+        return <Step6Equipment character={character} updateCharacter={updateCharacter} onJump={setStep} userContent={userContent} />;
+      case 7:
+        return <Step7Sheet character={character} updateCharacter={updateCharacter} onOpenInitiative={openInitiative} onSave={saveCharacter} />;
       default:
         return null;
     }
@@ -232,14 +248,14 @@ function App() {
                 <Stepper step={step} canEnter={canEnter} onJump={setStep} />
               </div>
               {/* Step content — fixed area; tall steps scroll inside */}
-              <div className="flex-1 min-h-0">{step === 5 ? renderStep() : <div className="h-full overflow-y-auto pr-1">{renderStep()}</div>}</div>
+              <div className="flex-1 min-h-0">{step === 6 ? renderStep() : <div className="h-full overflow-y-auto pr-1">{renderStep()}</div>}</div>
 
               {/* Footer nav — always visible at the bottom */}
               <div className="shrink-0 flex justify-between items-center pt-4">
                 <Button variant="ghost" onClick={() => setStep((s) => Math.max(1, s - 1))} disabled={step === 1}>
                   ← Back
                 </Button>
-                {step < 6 ? (
+                {step < 7 ? (
                   <Button onClick={() => setStep((s) => s + 1)} disabled={!completed[step]}>
                     {completed[step] ? 'Next →' : 'Complete this step →'}
                   </Button>
