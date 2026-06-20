@@ -19,6 +19,9 @@ export const CLASSES_DATA: ClassDef[] = [
       { id: 'A', desc: '(A) Greataxe, 4 Handaxes, Explorer’s Pack, and 15 GP', items: { Greataxe: 1, Handaxe: 4, 'Explorer’s Pack': 1 }, gp: 15 },
       { id: 'B', desc: '(B) 75 GP', items: {}, gp: 75 },
     ],
+    classFeatures1: {
+      weaponMastery: { count: 2, pool: 'simpleOrMartialMelee' },
+    },
   },
   {
     name: 'Bard',
@@ -40,6 +43,22 @@ export const CLASSES_DATA: ClassDef[] = [
       { id: 'A', desc: '(A) Chain Shirt, Shield, Mace, Holy Symbol, Priest’s Pack, and 7 GP', items: { 'Chain Shirt': 1, Shield: 1, Mace: 1, 'Holy Symbol': 1, 'Priest’s Pack': 1 }, gp: 7 },
       { id: 'B', desc: '(B) 110 GP', items: {}, gp: 110 },
     ],
+    classFeatures1: {
+      order: {
+        label: 'Divine Order',
+        options: [
+          {
+            name: 'Protector',
+            description: 'Trained for battle, you gain proficiency with Martial weapons and training with Heavy armor.',
+          },
+          {
+            name: 'Thaumaturge',
+            description:
+              'You know one extra cantrip from the Cleric spell list, and your mystical connection to the divine gives you a bonus (equal to your Wisdom modifier, minimum +1) to Intelligence (Arcana or Religion) checks.',
+          },
+        ],
+      },
+    },
   },
   {
     name: 'Druid',
@@ -52,6 +71,22 @@ export const CLASSES_DATA: ClassDef[] = [
       { id: 'A', desc: '(A) Leather Armor, Shield, Sickle, Druidic Focus, Explorer’s Pack, Herbalism Kit, and 9 GP', items: { 'Leather Armor': 1, Shield: 1, Sickle: 1, 'Druidic Focus': 1, 'Explorer’s Pack': 1, 'Herbalism Kit': 1 }, gp: 9 },
       { id: 'B', desc: '(B) 50 GP', items: {}, gp: 50 },
     ],
+    classFeatures1: {
+      order: {
+        label: 'Primal Order',
+        options: [
+          {
+            name: 'Magician',
+            description:
+              'You know one extra cantrip from the Druid spell list, and your mystical connection to nature gives you a bonus (equal to your Wisdom modifier, minimum +1) to Intelligence (Arcana or Nature) checks.',
+          },
+          {
+            name: 'Warden',
+            description: 'Trained for battle, you gain proficiency with Martial weapons and training with Medium armor.',
+          },
+        ],
+      },
+    },
   },
   {
     name: 'Fighter',
@@ -65,6 +100,10 @@ export const CLASSES_DATA: ClassDef[] = [
       { id: 'B', desc: '(B) Studded Leather Armor, Scimitar, Shortsword, Longbow, 20 Arrows, Quiver, Dungeoneer’s Pack, and 11 GP', items: { 'Studded Leather Armor': 1, Scimitar: 1, Shortsword: 1, Longbow: 1, Arrow: 20, Quiver: 1, 'Dungeoneer’s Pack': 1 }, gp: 11 },
       { id: 'C', desc: '(C) 155 GP', items: {}, gp: 155 },
     ],
+    classFeatures1: {
+      fightingStyle: true,
+      weaponMastery: { count: 3, pool: 'simpleOrMartial' },
+    },
   },
   {
     name: 'Monk',
@@ -89,6 +128,9 @@ export const CLASSES_DATA: ClassDef[] = [
       { id: 'A', desc: '(A) Chain Mail, Shield, Longsword, 6 Javelins, Holy Symbol, Priest’s Pack, and 9 GP', items: { 'Chain Mail': 1, Shield: 1, Longsword: 1, Javelin: 6, 'Holy Symbol': 1, 'Priest’s Pack': 1 }, gp: 9 },
       { id: 'B', desc: '(B) 150 GP', items: {}, gp: 150 },
     ],
+    classFeatures1: {
+      weaponMastery: { count: 2, pool: 'simpleOrMartial' },
+    },
   },
   {
     name: 'Ranger',
@@ -101,6 +143,9 @@ export const CLASSES_DATA: ClassDef[] = [
       { id: 'A', desc: '(A) Studded Leather Armor, Scimitar, Shortsword, Longbow, 20 Arrows, Quiver, Druidic Focus, Explorer’s Pack, and 7 GP', items: { 'Studded Leather Armor': 1, Scimitar: 1, Shortsword: 1, Longbow: 1, Arrow: 20, Quiver: 1, 'Druidic Focus': 1, 'Explorer’s Pack': 1 }, gp: 7 },
       { id: 'B', desc: '(B) 150 GP', items: {}, gp: 150 },
     ],
+    classFeatures1: {
+      weaponMastery: { count: 2, pool: 'simpleOrMartial' },
+    },
   },
   {
     name: 'Rogue',
@@ -113,6 +158,10 @@ export const CLASSES_DATA: ClassDef[] = [
       { id: 'A', desc: '(A) Leather Armor, 2 Daggers, Shortsword, Shortbow, 20 Arrows, Quiver, Thieves’ Tools, Burglar’s Pack, and 8 GP', items: { 'Leather Armor': 1, Dagger: 2, Shortsword: 1, Shortbow: 1, Arrow: 20, Quiver: 1, 'Thieves’ Tools': 1, 'Burglar’s Pack': 1 }, gp: 8 },
       { id: 'B', desc: '(B) 100 GP', items: {}, gp: 100 },
     ],
+    classFeatures1: {
+      weaponMastery: { count: 2, pool: 'finesseOrLight' },
+      expertise: { count: 2 },
+    },
   },
   {
     name: 'Sorcerer',
@@ -137,6 +186,9 @@ export const CLASSES_DATA: ClassDef[] = [
       { id: 'A', desc: '(A) Leather Armor, Sickle, 2 Daggers, Arcane Focus, Book, Scholar’s Pack, and 15 GP', items: { 'Leather Armor': 1, Sickle: 1, Dagger: 2, 'Arcane Focus': 1, Book: 1, 'Scholar’s Pack': 1 }, gp: 15 },
       { id: 'B', desc: '(B) 100 GP', items: {}, gp: 100 },
     ],
+    classFeatures1: {
+      invocation: true,
+    },
   },
   {
     name: 'Wizard',
