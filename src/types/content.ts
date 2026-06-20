@@ -14,15 +14,22 @@ export interface AbilityDef {
   badge: string; // tailwind classes for the badge chip
 }
 
-/** A background grants ability-score increases tied to three named abilities. */
-export interface BackgroundDef {
-  name: string;
-  abilities: [string, string, string]; // ability *names*, e.g. "Strength"
+/** One of the 18 standard D&D skills, tied to the ability used for its checks. */
+export interface SkillDef {
+  name: string; // "Athletics"
+  ability: AbilityId; // governing ability for untrained/trained checks
 }
 
-export interface SpeciesDef {
-  name: string;
-}
+/**
+ * A class's skill-choice grant: pick `count` skills, either from a fixed
+ * `options` list or — for classes like Bard whose 2024 rules say "choose
+ * any" — from the full skill list (`options: 'any'`). Modeled as a union
+ * rather than always shipping a list so "any" can't silently drift from
+ * the real 18-skill catalog if it's ever extended.
+ */
+export type SkillChoice =
+  | { count: number; options: string[] }
+  | { count: number; options: 'any' };
 
 /** One starting-equipment option for a class (the "(A) ..." / "(B) ..." choices). */
 export interface EquipmentPackage {
@@ -32,9 +39,43 @@ export interface EquipmentPackage {
   gp: number; // gold pieces granted if this package's leftover-funds shop is used
 }
 
+/**
+ * A class as one coherent record, keyed by named fields rather than scattered
+ * parallel lookups — `saves` and `skillChoices` sit alongside `packages` as
+ * first-class data on the same object, the same way `packages` already does.
+ */
 export interface ClassDef {
   name: string;
+  saves: [AbilityId, AbilityId]; // the two saving-throw proficiencies every class grants
+  skillChoices: SkillChoice;
   packages: EquipmentPackage[];
+}
+
+/**
+ * A background as one coherent record: ability triple, the Origin feat it
+ * grants, its two fixed skill proficiencies, its tool proficiency, and its
+ * equipment-package choice — mirroring the field-per-concern shape of
+ * ClassDef above rather than splitting these across separate lookup tables.
+ */
+export interface BackgroundDef {
+  name: string;
+  abilities: [string, string, string]; // ability *names*, e.g. "Strength"
+  feat: string; // Origin feat name, e.g. "Alert"
+  skills: [string, string]; // two fixed skill grants, e.g. ["Insight", "Religion"]
+  tool: string; // tool proficiency description, e.g. "Thieves' Tools" or "One kind of Gaming Set"
+  equipment: EquipmentPackage; // the "(A) ..." package; "(B) 50 GP" is implicit/universal
+}
+
+export interface SpeciesDef {
+  name: string;
+}
+
+/** Simple name+description feat for Phase 2 — no prerequisite tracking yet
+ * (deferred to the leveling phase). Scope is species-granted only (e.g. the
+ * Human's bonus Origin feat), not general/background-granted feat picks. */
+export interface FeatDef {
+  name: string;
+  description: string;
 }
 
 export interface ShopItem {
