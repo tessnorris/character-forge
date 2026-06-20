@@ -13,11 +13,11 @@ export const Step2Background = ({ character, updateCharacter }: StepProps) => {
 
   const handleBgChange = (val: string) => {
     if (!val) {
-      updateCharacter({ background: '', bonus2: '', bonus1: '' });
+      updateCharacter({ background: '', bonus2: '', bonus1: '', classSkills: [], expertise: [] });
       return;
     }
     const a = BACKGROUNDS[val];
-    updateCharacter({ background: val, bonus2: a[0], bonus1: a[1] });
+    updateCharacter({ background: val, bonus2: a[0], bonus1: a[1], classSkills: [], expertise: [] });
   };
 
   const handleBonus2 = (val: string) => {

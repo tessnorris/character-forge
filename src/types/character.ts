@@ -57,15 +57,25 @@ export interface Character {
   bonus2: string; // ability name receiving +2 (bonusType === '2-1')
   bonus1: string; // ability name receiving +1
 
-  // Step 3 — Abilities
+  // Step 3 — Class features (skills + class-specific level-1 choices).
+  // All optional/defaulted so older saved/imported characters (from before
+  // this step existed) still parse without a migration.
+  classSkills?: string[]; // class skill-choice picks (background's 2 fixed skills are derived, not stored here)
+  weaponMastery?: string[]; // chosen weapon names for classes with Weapon Mastery
+  fightingStyle?: string; // chosen Fighting Style name (Fighter only at level 1)
+  classOrder?: string; // chosen Order option name (Cleric's Divine Order / Druid's Primal Order)
+  expertise?: string[]; // chosen skills for Rogue's Expertise (must be a subset of the character's proficient skills)
+  invocation?: string; // chosen level-1 Eldritch Invocation name (Warlock only)
+
+  // Step 4 — Abilities
   baseScores: Record<string, number> | null; // ability name -> rolled score
   rollerState?: RollerState;
 
-  // Step 4 — Equipment
+  // Step 5 — Equipment
   equipmentPackageId: string | null;
   purchasedItems: Record<string, number>; // shop item name -> quantity
 
-  // Step 5 — Free-text flavor fields. Optional so older persisted/imported
+  // Step 6 — Free-text flavor fields. Optional so older persisted/imported
   // characters (saved before this field existed) still parse; components
   // reading this should fall back to emptyCharacterDetails().
   details?: CharacterDetails;

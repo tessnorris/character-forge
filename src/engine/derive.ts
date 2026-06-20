@@ -1,5 +1,5 @@
 import { ABILITY_NAMES } from '../data/abilities';
-import { BACKGROUNDS } from '../data/backgrounds';
+import { BACKGROUNDS, BACKGROUNDS_BY_NAME } from '../data/backgrounds';
 import type { Character } from '../types/character';
 import type { Combatant } from '../types/character';
 
@@ -81,4 +81,16 @@ export const finalScores = (character: Character): Record<string, FinalScore> =>
     out[n] = { base, bonus: bonuses[n], final: base == null ? null : base + bonuses[n] };
   });
   return out;
+};
+
+/** The full set of skills a character is proficient in: the background's
+ * two fixed skills (always granted, not a choice) plus whatever the player
+ * picked for the class's skillChoices. De-duplicated in case a class skill
+ * pick happens to overlap a background skill — proficiency doesn't stack,
+ * it's just one proficiency either way. */
+export const proficientSkills = (character: Character): string[] => {
+  const bg = character.background ? BACKGROUNDS_BY_NAME[character.background] : null;
+  const bgSkills = bg ? bg.skills : [];
+  const classSkills = character.classSkills ?? [];
+  return Array.from(new Set([...bgSkills, ...classSkills]));
 };

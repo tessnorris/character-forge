@@ -3,7 +3,8 @@ import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { ABILITY_NAMES, ABILITY_BY_NAME } from '../../data/abilities';
 import { CLASSES_DATA } from '../../data/classes';
-import { finalScores } from '../../engine/derive';
+import { BACKGROUNDS_BY_NAME } from '../../data/backgrounds';
+import { finalScores, proficientSkills } from '../../engine/derive';
 import { emptyCharacterDetails } from '../../types/character';
 import type { Character, CharacterDetails } from '../../types/character';
 import type { ReactNode } from 'react';
@@ -54,6 +55,8 @@ export const Step5Sheet = ({ character, updateCharacter, onOpenInitiative, onSav
   const scores = finalScores(character);
   const rolled = !!character.baseScores;
   const details = character.details ?? emptyCharacterDetails();
+  const skills = proficientSkills(character);
+  const bg = character.background ? BACKGROUNDS_BY_NAME[character.background] : null;
 
   const updateDetails = (patch: Partial<CharacterDetails>) => {
     updateCharacter({ details: { ...details, ...patch } });
@@ -94,7 +97,7 @@ export const Step5Sheet = ({ character, updateCharacter, onOpenInitiative, onSav
         </div>
         <div>
           <h3 className="text-slate-400 uppercase text-xs tracking-wider mb-2">Ability Scores</h3>
-          {!rolled && <p className="text-slate-500 italic text-sm mb-2">Roll abilities in step 3 to see final scores.</p>}
+          {!rolled && <p className="text-slate-500 italic text-sm mb-2">Roll abilities in the Abilities step to see final scores.</p>}
           <table className="w-full text-sm">
             <thead className="text-slate-500 text-xs uppercase">
               <tr>
@@ -121,6 +124,51 @@ export const Step5Sheet = ({ character, updateCharacter, onOpenInitiative, onSav
             </tbody>
           </table>
         </div>
+      </div>
+
+      <div className="p-6 border-t border-slate-800">
+        <h3 className="text-slate-400 uppercase text-xs tracking-wider mb-3">Skills &amp; Class Features</h3>
+        {skills.length === 0 ? (
+          <p className="text-slate-500 italic text-sm">No skill proficiencies selected yet.</p>
+        ) : (
+          <div className="flex flex-wrap gap-2 mb-4">
+            {skills.map((s) => (
+              <span key={s} className="bg-slate-800 border border-slate-700 text-slate-300 py-1 px-3 rounded-full text-sm">
+                {s}
+              </span>
+            ))}
+          </div>
+        )}
+        {bg && (
+          <div className="text-sm text-slate-400 mb-1">
+            Origin Feat: <span className="text-slate-200 font-medium">{bg.feat}</span>
+          </div>
+        )}
+        {character.weaponMastery && character.weaponMastery.length > 0 && (
+          <div className="text-sm text-slate-400 mb-1">
+            Weapon Mastery: <span className="text-slate-200 font-medium">{character.weaponMastery.join(', ')}</span>
+          </div>
+        )}
+        {character.fightingStyle && (
+          <div className="text-sm text-slate-400 mb-1">
+            Fighting Style: <span className="text-slate-200 font-medium">{character.fightingStyle}</span>
+          </div>
+        )}
+        {character.classOrder && (
+          <div className="text-sm text-slate-400 mb-1">
+            Order: <span className="text-slate-200 font-medium">{character.classOrder}</span>
+          </div>
+        )}
+        {character.expertise && character.expertise.length > 0 && (
+          <div className="text-sm text-slate-400 mb-1">
+            Expertise: <span className="text-slate-200 font-medium">{character.expertise.join(', ')}</span>
+          </div>
+        )}
+        {character.invocation && (
+          <div className="text-sm text-slate-400 mb-1">
+            Eldritch Invocation: <span className="text-slate-200 font-medium">{character.invocation}</span>
+          </div>
+        )}
       </div>
 
       <div className="p-6 border-t border-slate-800">

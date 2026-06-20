@@ -3,6 +3,7 @@ import { Button } from './components/ui/Button';
 import { Stepper } from './components/builder/Stepper';
 import { Step1Identity } from './components/builder/Step1Identity';
 import { Step2Background } from './components/builder/Step2Background';
+import { Step3Class } from './components/builder/Step3Class';
 import { Step3Roller } from './components/builder/Step3Roller';
 import { Step4Equipment } from './components/builder/Step4Equipment';
 import { Step5Sheet } from './components/builder/Step5Sheet';
@@ -12,6 +13,7 @@ import { HomebrewView } from './components/homebrew/HomebrewView';
 import { DiceRollerView } from './components/dice/DiceRollerView';
 import { uid, rollD20, getMod } from './engine/dice';
 import { finalScores } from './engine/derive';
+import { CLASSES_DATA } from './data/classes';
 import { loadState, saveState, loadUserContent, saveUserContent, extractImportedCharacters, PC_ID } from './state/storage';
 import { emptyUserContent } from './types/content';
 import type { UserContent } from './types/content';
@@ -78,7 +80,7 @@ function App() {
     const entry = roster.find((c) => c.id === id);
     if (!entry) return;
     setCharacter(JSON.parse(JSON.stringify(entry)));
-    setStep(5);
+    setStep(6);
     setView('builder');
   };
 
@@ -108,11 +110,25 @@ function App() {
     flash(`Imported ${withIds.length} character${withIds.length === 1 ? '' : 's'}`);
   };
 
+  const classDef = CLASSES_DATA.find((c) => c.name === character.charClass);
+  const classFeatures = classDef?.classFeatures1;
+  const classStepComplete = (): boolean => {
+    if (!classDef) return false;
+    if ((character.classSkills?.length ?? 0) !== classDef.skillChoices.count) return false;
+    if (classFeatures?.weaponMastery && (character.weaponMastery?.length ?? 0) !== classFeatures.weaponMastery.count) return false;
+    if (classFeatures?.fightingStyle && !character.fightingStyle) return false;
+    if (classFeatures?.order && !character.classOrder) return false;
+    if (classFeatures?.expertise && (character.expertise?.length ?? 0) !== classFeatures.expertise.count) return false;
+    if (classFeatures?.invocation && !character.invocation) return false;
+    return true;
+  };
+
   const completed: Record<number, boolean> = {
     1: !!(character.charClass && character.species),
     2: !!character.background,
-    3: !!character.baseScores,
-    4: !!character.equipmentPackageId,
+    3: classStepComplete(),
+    4: !!character.baseScores,
+    5: !!character.equipmentPackageId,
   };
   const canEnter = (s: number) => {
     for (let i = 1; i < s; i++) if (!completed[i]) return false;
@@ -159,10 +175,12 @@ function App() {
       case 2:
         return <Step2Background character={character} updateCharacter={updateCharacter} />;
       case 3:
-        return <Step3Roller character={character} updateCharacter={updateCharacter} />;
+        return <Step3Class character={character} updateCharacter={updateCharacter} />;
       case 4:
-        return <Step4Equipment character={character} updateCharacter={updateCharacter} onJump={setStep} userContent={userContent} />;
+        return <Step3Roller character={character} updateCharacter={updateCharacter} />;
       case 5:
+        return <Step4Equipment character={character} updateCharacter={updateCharacter} onJump={setStep} userContent={userContent} />;
+      case 6:
         return <Step5Sheet character={character} updateCharacter={updateCharacter} onOpenInitiative={openInitiative} onSave={saveCharacter} />;
       default:
         return null;
@@ -214,14 +232,14 @@ function App() {
                 <Stepper step={step} canEnter={canEnter} onJump={setStep} />
               </div>
               {/* Step content — fixed area; tall steps scroll inside */}
-              <div className="flex-1 min-h-0">{step === 4 ? renderStep() : <div className="h-full overflow-y-auto pr-1">{renderStep()}</div>}</div>
+              <div className="flex-1 min-h-0">{step === 5 ? renderStep() : <div className="h-full overflow-y-auto pr-1">{renderStep()}</div>}</div>
 
               {/* Footer nav — always visible at the bottom */}
               <div className="shrink-0 flex justify-between items-center pt-4">
                 <Button variant="ghost" onClick={() => setStep((s) => Math.max(1, s - 1))} disabled={step === 1}>
                   ← Back
                 </Button>
-                {step < 5 ? (
+                {step < 6 ? (
                   <Button onClick={() => setStep((s) => s + 1)} disabled={!completed[step]}>
                     {completed[step] ? 'Next →' : 'Complete this step →'}
                   </Button>

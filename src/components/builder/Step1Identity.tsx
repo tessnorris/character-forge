@@ -30,7 +30,19 @@ export const Step1Identity = ({ character, updateCharacter }: StepProps) => {
         label="Class"
         options={CLASSES}
         value={character.charClass}
-        onChange={(v) => updateCharacter({ charClass: v, equipmentPackageId: null, purchasedItems: {} })}
+        onChange={(v) =>
+          updateCharacter({
+            charClass: v,
+            equipmentPackageId: null,
+            purchasedItems: {},
+            classSkills: [],
+            weaponMastery: [],
+            fightingStyle: undefined,
+            classOrder: undefined,
+            expertise: [],
+            invocation: undefined,
+          })
+        }
         placeholder="-- Select Class --"
       />
       <SelectInput
