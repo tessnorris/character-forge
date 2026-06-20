@@ -46,6 +46,11 @@ export interface ShopItem {
  * A piece of equipment a *user* added that isn't in the shop catalog —
  * e.g. a campaign-specific magic item. Kept distinct from ShopItem so the
  * registry can tell built-in and homebrew gear apart.
+ *
+ * `costCP` is optional: campaign loot ("the DM gave me this") often has no
+ * sensible gold value. Items with a cost appear in the Step 4 shop like any
+ * other ShopItem; items without one are still addable to inventory directly,
+ * just not purchasable with starting funds.
  */
 export interface CustomEquipmentItem {
   id: string;
@@ -53,3 +58,17 @@ export interface CustomEquipmentItem {
   description?: string;
   costCP?: number;
 }
+
+/**
+ * All user-authored ("homebrew") content, as persisted to storage. Each
+ * category is a flat list today; as more content types are added (custom
+ * backgrounds, feats, etc.) they get their own array here rather than a
+ * generic untyped bag, so each stays independently typed and migratable.
+ */
+export interface UserContent {
+  customEquipment: CustomEquipmentItem[];
+}
+
+export const emptyUserContent = (): UserContent => ({
+  customEquipment: [],
+});
