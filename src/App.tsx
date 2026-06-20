@@ -8,12 +8,16 @@ import { Step4Equipment } from './components/builder/Step4Equipment';
 import { Step5Sheet } from './components/builder/Step5Sheet';
 import { InitiativeTracker } from './components/initiative/InitiativeTracker';
 import { RosterView } from './components/roster/RosterView';
+import { HomebrewView } from './components/homebrew/HomebrewView';
+import { DiceRollerView } from './components/dice/DiceRollerView';
 import { uid, rollD20, getMod } from './engine/dice';
 import { finalScores } from './engine/derive';
-import { loadState, saveState, extractImportedCharacters, PC_ID } from './state/storage';
+import { loadState, saveState, loadUserContent, saveUserContent, extractImportedCharacters, PC_ID } from './state/storage';
+import { emptyUserContent } from './types/content';
+import type { UserContent } from './types/content';
 import type { Character, Combatant } from './types/character';
 
-type View = 'builder' | 'roster' | 'initiative';
+type View = 'builder' | 'roster' | 'initiative' | 'dice' | 'homebrew';
 
 const blankCharacter = (): Character => ({
   id: uid(),
@@ -34,6 +38,7 @@ function App() {
   const [character, setCharacter] = useState<Character>(() => ({ ...blankCharacter(), ...(persisted?.character || {}) }));
   const [combatants, setCombatants] = useState<Combatant[]>(() => persisted?.combatants || []);
   const [roster, setRoster] = useState<Character[]>(() => persisted?.roster || []);
+  const [userContent, setUserContent] = useState<UserContent>(() => loadUserContent() ?? emptyUserContent());
   const [view, setView] = useState<View>('builder');
   const [step, setStep] = useState<number>(() => persisted?.step || 1);
   const [toast, setToast] = useState('');
@@ -42,7 +47,12 @@ function App() {
     saveState({ character, combatants, step, roster });
   }, [character, combatants, step, roster]);
 
+  useEffect(() => {
+    saveUserContent(userContent);
+  }, [userContent]);
+
   const updateCharacter = (patch: Partial<Character>) => setCharacter((prev) => ({ ...prev, ...patch }));
+  const updateUserContent = (patch: Partial<UserContent>) => setUserContent((prev) => ({ ...prev, ...patch }));
   const flash = (msg: string) => {
     setToast(msg);
     setTimeout(() => setToast(''), 2200);
@@ -151,7 +161,7 @@ function App() {
       case 3:
         return <Step3Roller character={character} updateCharacter={updateCharacter} />;
       case 4:
-        return <Step4Equipment character={character} updateCharacter={updateCharacter} onJump={setStep} />;
+        return <Step4Equipment character={character} updateCharacter={updateCharacter} onJump={setStep} userContent={userContent} />;
       case 5:
         return <Step5Sheet character={character} onOpenInitiative={openInitiative} onSave={saveCharacter} />;
       default:
@@ -177,6 +187,8 @@ function App() {
                 { v: 'builder' as const, label: 'Builder', onClick: () => setView('builder') },
                 { v: 'roster' as const, label: 'Characters', onClick: () => setView('roster') },
                 { v: 'initiative' as const, label: 'Initiative', onClick: openInitiative },
+                { v: 'dice' as const, label: 'Dice', onClick: () => setView('dice') },
+                { v: 'homebrew' as const, label: 'Homebrew', onClick: () => setView('homebrew') },
               ]
             ).map((tab) => (
               <button
@@ -228,6 +240,10 @@ function App() {
           {view === 'roster' && <RosterView roster={roster} onView={viewCharacter} onDelete={deleteCharacter} onNew={newCharacter} onImport={importCharacters} />}
 
           {view === 'initiative' && <InitiativeTracker combatants={combatants} setCombatants={setCombatants} />}
+
+          {view === 'dice' && <DiceRollerView />}
+
+          {view === 'homebrew' && <HomebrewView userContent={userContent} updateUserContent={updateUserContent} />}
         </div>
       </main>
 

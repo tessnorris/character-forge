@@ -1,5 +1,16 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { getMod, fmtMod, rollD20, rollDie, generateAbilityScore, uid } from '../dice';
+import {
+  getMod,
+  fmtMod,
+  rollD20,
+  rollDie,
+  generateAbilityScore,
+  uid,
+  parseDiceNotation,
+  rollNotation,
+  rollDieOfSize,
+  rollD20WithAdvantage,
+} from '../dice';
 
 describe('getMod', () => {
   // The 5e ability modifier table: floor((score - 10) / 2).
@@ -106,5 +117,86 @@ describe('randomness-based functions', () => {
       expect(result.rolls).toEqual([1, 6, 4]);
       expect(result.kept).toEqual([6, 4, 1]);
     });
+  });
+
+  describe('rollDieOfSize', () => {
+    it('maps random()=0 to a roll of 1 regardless of die size', () => {
+      randomSpy.mockReturnValue(0);
+      expect(rollDieOfSize(20)).toBe(1);
+      expect(rollDieOfSize(4)).toBe(1);
+    });
+
+    it('maps random() just under 1 to the maximum face', () => {
+      randomSpy.mockReturnValue(0.9999);
+      expect(rollDieOfSize(8)).toBe(8);
+    });
+  });
+
+  describe('rollNotation', () => {
+    it('rolls the specified count and sides, summing plus the modifier', () => {
+      // 2d6+3 with rolls of 3 and 5 -> 3 + 5 + 3 = 11
+      randomSpy.mockReturnValueOnce(2 / 6).mockReturnValueOnce(4 / 6); // -> 3, 5
+      const result = rollNotation({ count: 2, sides: 6, modifier: 3 });
+      expect(result.rolls).toEqual([3, 5]);
+      expect(result.total).toBe(11);
+    });
+
+    it('handles a single die with no modifier', () => {
+      randomSpy.mockReturnValue(0.9999); // -> 20 on a d20
+      const result = rollNotation({ count: 1, sides: 20, modifier: 0 });
+      expect(result.rolls).toEqual([20]);
+      expect(result.total).toBe(20);
+    });
+
+    it('applies a negative modifier correctly', () => {
+      randomSpy.mockReturnValue(0); // -> 1
+      const result = rollNotation({ count: 1, sides: 8, modifier: -2 });
+      expect(result.total).toBe(-1); // 1 - 2
+    });
+  });
+
+  describe('rollD20WithAdvantage', () => {
+    it('keeps the higher of two rolls in advantage mode', () => {
+      randomSpy.mockReturnValueOnce(0.25).mockReturnValueOnce(0.9); // -> 6, 19
+      const result = rollD20WithAdvantage('advantage');
+      expect(result.rolls).toEqual([6, 19]);
+      expect(result.kept).toBe(19);
+      expect(result.mode).toBe('advantage');
+    });
+
+    it('keeps the lower of two rolls in disadvantage mode', () => {
+      randomSpy.mockReturnValueOnce(0.25).mockReturnValueOnce(0.9); // -> 6, 19
+      const result = rollD20WithAdvantage('disadvantage');
+      expect(result.kept).toBe(6);
+      expect(result.mode).toBe('disadvantage');
+    });
+  });
+});
+
+describe('parseDiceNotation', () => {
+  it.each([
+    ['d20', { count: 1, sides: 20, modifier: 0 }],
+    ['1d20', { count: 1, sides: 20, modifier: 0 }],
+    ['2d6', { count: 2, sides: 6, modifier: 0 }],
+    ['4d6+2', { count: 4, sides: 6, modifier: 2 }],
+    ['1d8-1', { count: 1, sides: 8, modifier: -1 }],
+    ['D8', { count: 1, sides: 8, modifier: 0 }], // case-insensitive
+    [' 2d10 + 5 ', { count: 2, sides: 10, modifier: 5 }], // tolerates whitespace
+  ])('parses %s', (input, expected) => {
+    expect(parseDiceNotation(input)).toEqual(expected);
+  });
+
+  it.each([
+    [''],
+    ['not dice'],
+    ['d'],
+    ['2d'],
+    ['d0'], // zero-sided die is nonsensical
+    ['d1'], // technically matches the digit pattern but a 1-sided die is rejected
+    ['0d6'], // zero dice
+    ['2d6++3'], // malformed modifier
+    ['2x6'], // wrong separator
+  ])('rejects %s as null rather than guessing', (input) => {
+    expect(parseDiceNotation(input)).toBeNull();
   });
 });

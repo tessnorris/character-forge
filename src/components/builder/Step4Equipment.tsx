@@ -1,40 +1,50 @@
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { CLASSES_DATA } from '../../data/classes';
-import { SHOP_ITEMS } from '../../data/equipment';
+import { getPurchasableEquipment, findEquipment } from '../../content/registry';
 import { formatCurrency } from '../../engine/derive';
+import type { UserContent } from '../../types/content';
 import type { StepProps } from './types';
 
 interface Step4Props extends StepProps {
   onJump: (step: number) => void;
+  userContent: UserContent;
 }
 
-export const Step4Equipment = ({ character, updateCharacter, onJump }: Step4Props) => {
+export const Step4Equipment = ({ character, updateCharacter, onJump, userContent }: Step4Props) => {
   const classObj = CLASSES_DATA.find((c) => c.name === character.charClass);
   const pkg = classObj ? classObj.packages.find((p) => p.id === character.equipmentPackageId) : undefined;
+  const shopItems = getPurchasableEquipment(userContent);
 
   // Cheap computations over small objects — the React Compiler handles
   // memoization automatically, so no manual useMemo is needed here.
+  // `purchasedItems` is keyed by registry key: an item's name for built-ins
+  // (matching the starting package items below, which are also name-keyed),
+  // or its id for homebrew — see content/registry.ts for why those differ.
   let spentFundsCP = 0;
-  for (const [name, qty] of Object.entries(character.purchasedItems || {})) {
-    const item = SHOP_ITEMS.find((i) => i.name === name);
-    if (item) spentFundsCP += item.costCP * qty;
+  for (const [key, qty] of Object.entries(character.purchasedItems || {})) {
+    const entry = findEquipment(key, userContent);
+    if (entry?.costCP != null) spentFundsCP += entry.costCP * qty;
   }
 
+  // Display names for the combined equipment list: starting-package items
+  // are already name-keyed; purchased items may be name- or id-keyed, so
+  // resolve each through the registry to get a display name.
   const combinedEquipment: Record<string, number> = pkg ? { ...pkg.items } : {};
-  for (const [name, qty] of Object.entries(character.purchasedItems || {})) {
-    combinedEquipment[name] = (combinedEquipment[name] || 0) + qty;
+  for (const [key, qty] of Object.entries(character.purchasedItems || {})) {
+    const displayName = findEquipment(key, userContent)?.name ?? key;
+    combinedEquipment[displayName] = (combinedEquipment[displayName] || 0) + qty;
   }
 
   const initialFundsCP = pkg ? pkg.gp * 100 : 0;
   const remainingFundsCP = initialFundsCP - spentFundsCP;
 
-  const updateCart = (name: string, delta: number) => {
+  const updateCart = (key: string, delta: number) => {
     const prev = character.purchasedItems || {};
-    const qty = (prev[name] || 0) + delta;
+    const qty = (prev[key] || 0) + delta;
     const next = { ...prev };
-    if (qty <= 0) delete next[name];
-    else next[name] = qty;
+    if (qty <= 0) delete next[key];
+    else next[key] = qty;
     updateCharacter({ purchasedItems: next });
   };
 
@@ -102,17 +112,24 @@ export const Step4Equipment = ({ character, updateCharacter, onJump }: Step4Prop
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800">
-              {SHOP_ITEMS.map((item) => {
-                const qty = (character.purchasedItems || {})[item.name] || 0;
-                const canAfford = remainingFundsCP >= item.costCP;
+              {shopItems.map((item) => {
+                const qty = (character.purchasedItems || {})[item.key] || 0;
+                const canAfford = item.costCP != null && remainingFundsCP >= item.costCP;
                 return (
-                  <tr key={item.name} className="hover:bg-slate-800/40">
-                    <td className="p-3 text-slate-200">{item.name}</td>
-                    <td className="p-3 text-slate-400">{formatCurrency(item.costCP)}</td>
+                  <tr key={item.key} className="hover:bg-slate-800/40">
+                    <td className="p-3 text-slate-200">
+                      {item.name}
+                      {item.isHomebrew && (
+                        <span className="ml-2 text-[10px] uppercase tracking-wide bg-accent-900/40 text-accent-300 border border-accent-800 rounded px-1.5 py-0.5">
+                          Homebrew
+                        </span>
+                      )}
+                    </td>
+                    <td className="p-3 text-slate-400">{item.costCP != null ? formatCurrency(item.costCP) : '—'}</td>
                     <td className="p-3 text-center whitespace-nowrap">
                       <div className="inline-flex items-center gap-1 bg-slate-800 rounded-lg p-1">
                         <button
-                          onClick={() => updateCart(item.name, -1)}
+                          onClick={() => updateCart(item.key, -1)}
                           disabled={qty === 0}
                           className="w-8 h-8 flex items-center justify-center rounded-md bg-slate-700 text-slate-200 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed"
                         >
@@ -120,7 +137,7 @@ export const Step4Equipment = ({ character, updateCharacter, onJump }: Step4Prop
                         </button>
                         <span className="w-8 text-center font-medium text-white">{qty}</span>
                         <button
-                          onClick={() => updateCart(item.name, 1)}
+                          onClick={() => updateCart(item.key, 1)}
                           disabled={!canAfford}
                           className="w-8 h-8 flex items-center justify-center rounded-md bg-slate-700 text-slate-200 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed"
                         >
