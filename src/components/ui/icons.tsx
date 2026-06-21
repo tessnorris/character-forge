@@ -14,3 +14,11 @@ export const IconD20 = () => (
     <path d="m16.9 8.2 4.1.9" />
   </svg>
 );
+
+export const IconMenu = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M4 6h16" />
+    <path d="M4 12h16" />
+    <path d="M4 18h16" />
+  </svg>
+);

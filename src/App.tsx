@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Button } from './components/ui/Button';
+import { IconMenu } from './components/ui/icons';
 import { Stepper } from './components/builder/Stepper';
 import { Step1Identity } from './components/builder/Step1Identity';
 import { Step2Class } from './components/builder/Step2Class';
@@ -47,6 +48,7 @@ function App() {
   const [view, setView] = useState<View>('builder');
   const [step, setStep] = useState<number>(() => persisted?.step || 1);
   const [toast, setToast] = useState('');
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     saveState({ character, combatants, step, roster });
@@ -210,7 +212,7 @@ function App() {
   return (
     <div id="app-root" className="h-screen flex flex-col overflow-hidden">
       {/* Header */}
-      <header className="border-b border-slate-800 bg-slate-900/60 backdrop-blur shrink-0 z-40">
+      <header className="border-b border-slate-800 bg-slate-900/60 backdrop-blur shrink-0 z-40 relative">
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
           <button onClick={() => setView('builder')} className="flex items-center gap-2 shrink-0">
             <span className="text-2xl">⚔️</span>
@@ -220,28 +222,66 @@ function App() {
             </div>
           </button>
           <div className="flex items-center gap-1 sm:gap-2">
-            {(
-              [
-                { v: 'builder' as const, label: 'Builder', onClick: () => setView('builder') },
-                { v: 'roster' as const, label: 'Characters', onClick: () => setView('roster') },
-                { v: 'initiative' as const, label: 'Initiative', onClick: openInitiative },
-                { v: 'dice' as const, label: 'Dice', onClick: () => setView('dice') },
-                { v: 'homebrew' as const, label: 'Homebrew', onClick: () => setView('homebrew') },
-              ]
-            ).map((tab) => (
-              <button
-                key={tab.v}
-                onClick={tab.onClick}
-                className={`px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${view === tab.v ? 'bg-accent-600 text-white' : 'text-slate-300 hover:text-white hover:bg-slate-800'}`}
-              >
-                {tab.label}
-              </button>
-            ))}
+            <button
+              onClick={() => setView('roster')}
+              className={`px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${view === 'roster' ? 'bg-accent-600 text-white' : 'text-slate-300 hover:text-white hover:bg-slate-800'}`}
+            >
+              Characters
+            </button>
             <Button variant="ghost" onClick={newCharacter} className="hidden md:inline-flex">
               New
             </Button>
+            <button
+              onClick={() => setMenuOpen((open) => !open)}
+              aria-label="Menu"
+              aria-expanded={menuOpen}
+              className="p-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition-colors"
+            >
+              <IconMenu />
+            </button>
           </div>
         </div>
+
+        {menuOpen && (
+          <>
+            <button
+              aria-label="Close menu"
+              onClick={() => setMenuOpen(false)}
+              className="fixed inset-0 z-40 cursor-default"
+            />
+            <nav className="absolute right-4 top-full mt-1 z-50 w-48 bg-slate-900 border border-slate-800 rounded-xl shadow-xl py-2 anim-fade-in">
+              {(
+                [
+                  { v: 'builder' as const, label: 'Builder', onClick: () => setView('builder') },
+                  { v: 'roster' as const, label: 'Characters', onClick: () => setView('roster') },
+                  { v: 'initiative' as const, label: 'Initiative', onClick: openInitiative },
+                  { v: 'dice' as const, label: 'Dice', onClick: () => setView('dice') },
+                  { v: 'homebrew' as const, label: 'Homebrew', onClick: () => setView('homebrew') },
+                ]
+              ).map((tab) => (
+                <button
+                  key={tab.v}
+                  onClick={() => {
+                    tab.onClick();
+                    setMenuOpen(false);
+                  }}
+                  className={`block w-full text-left px-4 py-2 text-sm font-semibold transition-colors ${view === tab.v ? 'text-accent-400 bg-slate-800/60' : 'text-slate-300 hover:text-white hover:bg-slate-800'}`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+              <button
+                onClick={() => {
+                  newCharacter();
+                  setMenuOpen(false);
+                }}
+                className="block w-full text-left px-4 py-2 text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800 transition-colors md:hidden"
+              >
+                New
+              </button>
+            </nav>
+          </>
+        )}
       </header>
 
       <main className="flex-1 min-h-0">
