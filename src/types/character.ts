@@ -5,6 +5,11 @@
 
 export type BonusType = '2-1' | '1-1-1';
 
+/** Character gender, used to drive gender-specific first-name suggestions on
+ * Step 1. Purely cosmetic — it feeds the name suggester and nothing in the
+ * rules engine. Optional on Character so older saves parse without migration. */
+export type Gender = 'male' | 'nonbinary' | 'female';
+
 /** Working state of the ability-score roller (Step 3), persisted so
  * navigating back to the step restores it instead of losing progress. */
 export interface RollerState {
@@ -63,6 +68,7 @@ export interface Character {
   name: string;
   charClass: string;
   species: string;
+  gender?: Gender; // optional; drives the Step 1 name suggester only
 
   // Step 2 — Class features (skills + class-specific level-1 choices).
   // All optional/defaulted so older saved/imported characters (from before
