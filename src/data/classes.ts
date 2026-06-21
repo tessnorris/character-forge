@@ -10,6 +10,8 @@ import type { ClassDef } from '../types/content';
 export const CLASSES_DATA: ClassDef[] = [
   {
     name: 'Barbarian',
+    hitDie: 12,
+    weaponProficiencies: ['simple', 'martial'],
     saves: ['str', 'con'],
     skillChoices: {
       count: 2,
@@ -25,6 +27,8 @@ export const CLASSES_DATA: ClassDef[] = [
   },
   {
     name: 'Bard',
+    hitDie: 8,
+    weaponProficiencies: ['simple'],
     saves: ['dex', 'cha'],
     skillChoices: { count: 3, options: 'any' },
     packages: [
@@ -34,6 +38,8 @@ export const CLASSES_DATA: ClassDef[] = [
   },
   {
     name: 'Cleric',
+    hitDie: 8,
+    weaponProficiencies: ['simple'],
     saves: ['wis', 'cha'],
     skillChoices: {
       count: 2,
@@ -62,6 +68,8 @@ export const CLASSES_DATA: ClassDef[] = [
   },
   {
     name: 'Druid',
+    hitDie: 8,
+    weaponProficiencies: ['simple'],
     saves: ['int', 'wis'],
     skillChoices: {
       count: 2,
@@ -90,6 +98,8 @@ export const CLASSES_DATA: ClassDef[] = [
   },
   {
     name: 'Fighter',
+    hitDie: 10,
+    weaponProficiencies: ['simple', 'martial'],
     saves: ['str', 'con'],
     skillChoices: {
       count: 2,
@@ -107,6 +117,8 @@ export const CLASSES_DATA: ClassDef[] = [
   },
   {
     name: 'Monk',
+    hitDie: 8,
+    weaponProficiencies: ['simple', 'martialLight'],
     saves: ['str', 'dex'],
     skillChoices: {
       count: 2,
@@ -119,6 +131,8 @@ export const CLASSES_DATA: ClassDef[] = [
   },
   {
     name: 'Paladin',
+    hitDie: 10,
+    weaponProficiencies: ['simple', 'martial'],
     saves: ['wis', 'cha'],
     skillChoices: {
       count: 2,
@@ -134,6 +148,8 @@ export const CLASSES_DATA: ClassDef[] = [
   },
   {
     name: 'Ranger',
+    hitDie: 10,
+    weaponProficiencies: ['simple', 'martial'],
     saves: ['str', 'dex'],
     skillChoices: {
       count: 3,
@@ -149,6 +165,8 @@ export const CLASSES_DATA: ClassDef[] = [
   },
   {
     name: 'Rogue',
+    hitDie: 8,
+    weaponProficiencies: ['simple', 'martialFinesseOrLight'],
     saves: ['dex', 'int'],
     skillChoices: {
       count: 4,
@@ -165,6 +183,8 @@ export const CLASSES_DATA: ClassDef[] = [
   },
   {
     name: 'Sorcerer',
+    hitDie: 6,
+    weaponProficiencies: ['simple'],
     saves: ['con', 'cha'],
     skillChoices: {
       count: 2,
@@ -177,6 +197,8 @@ export const CLASSES_DATA: ClassDef[] = [
   },
   {
     name: 'Warlock',
+    hitDie: 8,
+    weaponProficiencies: ['simple'],
     saves: ['wis', 'cha'],
     skillChoices: {
       count: 2,
@@ -192,6 +214,8 @@ export const CLASSES_DATA: ClassDef[] = [
   },
   {
     name: 'Wizard',
+    hitDie: 6,
+    weaponProficiencies: ['simple'],
     saves: ['int', 'wis'],
     skillChoices: {
       count: 2,

@@ -95,6 +95,10 @@ export interface Character {
   // Step 6 — Equipment
   equipmentPackageId: string | null;
   purchasedItems: Record<string, number>; // shop item name -> quantity
+  /** Names of items the player has marked as equipped (worn armor/shield,
+   * wielded weapons). Drives AC on the derived sheet and the "equipped" flag
+   * on weapon attack lines. Optional/defaulted so older saves still parse. */
+  equipped?: string[];
 
   // Step 7 — Spell list (simple name entry, no compendium) and free-text
   // flavor fields. Both optional so older persisted/imported characters

@@ -1,12 +1,12 @@
 import { describe, it, expect } from 'vitest';
 import { useState } from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Step8Sheet } from '../Step8Sheet';
 import { makeCharacter } from '../../../test/factories';
 import type { Character } from '../../../types/character';
 
-function renderStep5(initial: Partial<Character> = {}) {
+function renderSheet(initial: Partial<Character> = {}) {
   function Harness() {
     const [character, setCharacter] = useState<Character>(makeCharacter(initial));
     const updateCharacter = (patch: Partial<Character>) => setCharacter((prev) => ({ ...prev, ...patch }));
@@ -15,9 +15,15 @@ function renderStep5(initial: Partial<Character> = {}) {
   return render(<Harness />);
 }
 
+/** Read the big number out of a StatCard, located by its label text. */
+const statValue = (label: string) => {
+  const card = screen.getByText(label).parentElement as HTMLElement;
+  return card;
+};
+
 describe('Step8Sheet — character details', () => {
   it('renders all four detail fields empty by default', () => {
-    renderStep5();
+    renderSheet();
     expect(screen.getByLabelText('Background story')).toHaveValue('');
     expect(screen.getByLabelText('Physical description')).toHaveValue('');
     expect(screen.getByLabelText('Personality')).toHaveValue('');
@@ -26,7 +32,7 @@ describe('Step8Sheet — character details', () => {
 
   it('typing into a detail field persists it back into character.details', async () => {
     const user = userEvent.setup();
-    renderStep5();
+    renderSheet();
 
     await user.type(screen.getByLabelText('Background story'), 'Raised by wolves.');
 
@@ -35,7 +41,7 @@ describe('Step8Sheet — character details', () => {
 
   it('editing one field does not clear the others', async () => {
     const user = userEvent.setup();
-    renderStep5();
+    renderSheet();
 
     await user.type(screen.getByLabelText('Background story'), 'Backstory text');
     await user.type(screen.getByLabelText('Personality'), 'Personality text');
@@ -45,15 +51,12 @@ describe('Step8Sheet — character details', () => {
   });
 
   it('renders correctly for a character with no `details` field at all (pre-existing/imported save)', () => {
-    // Characters saved before this field existed won't have `details` set;
-    // the component must fall back to empty strings rather than crashing
-    // on character.details.backgroundDescription being undefined.
-    renderStep5({ details: undefined });
+    renderSheet({ details: undefined });
     expect(screen.getByLabelText('Background story')).toHaveValue('');
   });
 
   it('pre-populates fields from an existing character.details', () => {
-    renderStep5({
+    renderSheet({
       details: {
         backgroundDescription: 'An old story.',
         physicalDescription: 'Tall and weathered.',
@@ -69,21 +72,66 @@ describe('Step8Sheet — character details', () => {
   });
 });
 
+const CLEAN_SCORES = { Strength: 16, Dexterity: 14, Constitution: 12, Intelligence: 10, Wisdom: 13, Charisma: 8 };
+
+describe('Step8Sheet — derived sheet', () => {
+  it('shows derived AC, HP, and proficiency bonus for a rolled character', () => {
+    renderSheet({ charClass: 'Fighter', baseScores: CLEAN_SCORES });
+    expect(within(statValue('AC')).getByText('12')).toBeInTheDocument(); // unarmored 10 + DEX 2
+    expect(within(statValue('HP')).getByText('11')).toBeInTheDocument(); // d10 + CON 1
+    expect(within(statValue('Prof')).getByText('+2')).toBeInTheDocument();
+  });
+
+  it('prompts to roll abilities when scores are missing', () => {
+    renderSheet({ charClass: 'Fighter', baseScores: null });
+    expect(screen.getByText(/Roll abilities/i)).toBeInTheDocument();
+  });
+
+  it('toggling an armor item as equipped recomputes AC', async () => {
+    const user = userEvent.setup();
+    renderSheet({ charClass: 'Fighter', baseScores: CLEAN_SCORES, purchasedItems: { 'Studded Leather Armor': 1 } });
+
+    // Unarmored to start: 10 + DEX 2 = 12.
+    expect(within(statValue('AC')).getByText('12')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Equip' }));
+
+    // Studded Leather (12) + DEX 2 = 14.
+    expect(within(statValue('AC')).getByText('14')).toBeInTheDocument();
+  });
+
+  it('renders a weapon attack line with attack bonus and damage', () => {
+    renderSheet({ charClass: 'Fighter', baseScores: CLEAN_SCORES, purchasedItems: { Longsword: 1 } });
+    // "Longsword" also appears in the equipment list, so scope to the Attacks section.
+    const attacks = within(screen.getByText('Attacks').closest('div')!);
+    expect(attacks.getByText('Longsword')).toBeInTheDocument();
+    expect(attacks.getByText('+5')).toBeInTheDocument(); // STR +3 + PB 2
+    expect(attacks.getByText(/1d8 \+ 3/)).toBeInTheDocument();
+  });
+
+  it('groups features under their source', () => {
+    renderSheet({ charClass: 'Fighter', species: 'Human', background: 'Soldier', baseScores: CLEAN_SCORES, fightingStyle: 'Archery', speciesBonusFeat: 'Alert' });
+    expect(screen.getByText('Fighter (Class)')).toBeInTheDocument();
+    expect(screen.getByText('Soldier (Background)')).toBeInTheDocument();
+    expect(screen.getByText(/Fighting Style: Archery/)).toBeInTheDocument();
+  });
+});
+
 describe('Step8Sheet — spells (read-only)', () => {
   it('shows "No cantrips." and "No spells." when there are none', () => {
-    renderStep5();
+    renderSheet();
     expect(screen.getByText('No cantrips.')).toBeInTheDocument();
     expect(screen.getByText('No spells.')).toBeInTheDocument();
   });
 
   it('renders correctly for a character with no `spells` field at all (pre-existing/imported save)', () => {
-    renderStep5({ spells: undefined });
+    renderSheet({ spells: undefined });
     expect(screen.getByText('No cantrips.')).toBeInTheDocument();
     expect(screen.getByText('No spells.')).toBeInTheDocument();
   });
 
   it('lists cantrips (level 0) separately from leveled spells', () => {
-    renderStep5({
+    renderSheet({
       spells: [
         { id: 'c-1', name: 'Fire Bolt', level: 0 },
         { id: 's-1', name: 'Shield' },
@@ -97,7 +145,7 @@ describe('Step8Sheet — spells (read-only)', () => {
   });
 
   it('marks a prepared spell but never a cantrip', () => {
-    renderStep5({
+    renderSheet({
       spells: [
         { id: 'c-1', name: 'Mage Hand', level: 0, prepared: true },
         { id: 's-1', name: 'Hex', prepared: true },
@@ -108,8 +156,8 @@ describe('Step8Sheet — spells (read-only)', () => {
     expect(screen.getAllByText('(prepared)')).toHaveLength(1);
   });
 
-  it('does not render any editable inputs, buttons to add/remove, or checkboxes', () => {
-    renderStep5({
+  it('does not render any editable inputs, buttons to add/remove, or checkboxes for spells', () => {
+    renderSheet({
       spells: [
         { id: 'c-1', name: 'Fire Bolt', level: 0 },
         { id: 's-1', name: 'Shield' },

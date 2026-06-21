@@ -46,6 +46,13 @@ export interface EquipmentPackage {
  */
 export interface ClassDef {
   name: string;
+  /** Size of the class's Hit Die (a d8 is `8`). Level-1 hit points are
+   * `hitDie + CON modifier` (you take the die's max at level 1). */
+  hitDie: number;
+  /** Weapon-proficiency groups the class grants at level 1 (see
+   * WeaponProficiency). Drives which weapons add the proficiency bonus to
+   * their attack rolls on the derived sheet. */
+  weaponProficiencies: WeaponProficiency[];
   saves: [AbilityId, AbilityId]; // the two saving-throw proficiencies every class grants
   skillChoices: SkillChoice;
   packages: EquipmentPackage[];
@@ -91,11 +98,45 @@ export interface ClassFeatures1 {
 export type WeaponCategory = 'simpleMelee' | 'simpleRanged' | 'martialMelee' | 'martialRanged';
 export type MasteryProperty = 'Cleave' | 'Graze' | 'Nick' | 'Push' | 'Sap' | 'Slow' | 'Topple' | 'Vex';
 
+/**
+ * A weapon-proficiency grant a class confers. Most classes grant a whole
+ * category ('simple' and/or 'martial'); Monk and Rogue grant Simple weapons
+ * plus a property-filtered slice of Martial weapons, so those carry their own
+ * tokens rather than the blanket 'martial'.
+ */
+export type WeaponProficiency = 'simple' | 'martial' | 'martialLight' | 'martialFinesseOrLight';
+
+export type DamageType = 'bludgeoning' | 'piercing' | 'slashing';
+
+export interface WeaponDamage {
+  dice: string; // base damage dice, e.g. "1d8", "2d6", or "1" (Blowgun)
+  type: DamageType;
+  versatile?: string; // two-handed damage dice for Versatile weapons, e.g. "1d10"
+}
+
 export interface WeaponDef {
   name: string;
   category: WeaponCategory;
   properties: string[]; // e.g. ["Finesse", "Light"] — free-text property names from the SRD
   mastery: MasteryProperty;
+  damage: WeaponDamage;
+}
+
+export type ArmorType = 'light' | 'medium' | 'heavy' | 'shield';
+
+/**
+ * A piece of armor (or a shield) from the SRD armor table. AC contribution:
+ * - light:  baseAC + full DEX modifier
+ * - medium: baseAC + DEX modifier capped at +2
+ * - heavy:  baseAC (DEX ignored)
+ * - shield: a flat +baseAC bonus on top of whatever armor is worn
+ */
+export interface ArmorDef {
+  name: string;
+  type: ArmorType;
+  baseAC: number; // for a shield, the flat bonus it adds (e.g. 2)
+  stealthDisadvantage?: boolean;
+  strengthReq?: number; // minimum STR before a Speed penalty applies (heavy armors)
 }
 
 /** One of the 10 Fighting Style feats. Mechanics are populated for the 4
