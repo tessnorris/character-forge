@@ -68,3 +68,58 @@ describe('Step8Sheet — character details', () => {
     expect(screen.getByLabelText('Notes')).toHaveValue('Owes a debt to the thieves guild.');
   });
 });
+
+describe('Step8Sheet — spells (read-only)', () => {
+  it('shows "No cantrips." and "No spells." when there are none', () => {
+    renderStep5();
+    expect(screen.getByText('No cantrips.')).toBeInTheDocument();
+    expect(screen.getByText('No spells.')).toBeInTheDocument();
+  });
+
+  it('renders correctly for a character with no `spells` field at all (pre-existing/imported save)', () => {
+    renderStep5({ spells: undefined });
+    expect(screen.getByText('No cantrips.')).toBeInTheDocument();
+    expect(screen.getByText('No spells.')).toBeInTheDocument();
+  });
+
+  it('lists cantrips (level 0) separately from leveled spells', () => {
+    renderStep5({
+      spells: [
+        { id: 'c-1', name: 'Fire Bolt', level: 0 },
+        { id: 's-1', name: 'Shield' },
+      ],
+    });
+
+    expect(screen.getByText('Fire Bolt')).toBeInTheDocument();
+    expect(screen.getByText('Shield')).toBeInTheDocument();
+    expect(screen.queryByText('No cantrips.')).not.toBeInTheDocument();
+    expect(screen.queryByText('No spells.')).not.toBeInTheDocument();
+  });
+
+  it('marks a prepared spell but never a cantrip', () => {
+    renderStep5({
+      spells: [
+        { id: 'c-1', name: 'Mage Hand', level: 0, prepared: true },
+        { id: 's-1', name: 'Hex', prepared: true },
+        { id: 's-2', name: 'Web' },
+      ],
+    });
+
+    expect(screen.getAllByText('(prepared)')).toHaveLength(1);
+  });
+
+  it('does not render any editable inputs, buttons to add/remove, or checkboxes', () => {
+    renderStep5({
+      spells: [
+        { id: 'c-1', name: 'Fire Bolt', level: 0 },
+        { id: 's-1', name: 'Shield' },
+      ],
+    });
+
+    expect(screen.queryByPlaceholderText('Cantrip name')).not.toBeInTheDocument();
+    expect(screen.queryByPlaceholderText('Spell name')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: '+ Add Cantrip' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: '+ Add Spell' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();
+  });
+});

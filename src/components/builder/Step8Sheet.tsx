@@ -58,6 +58,9 @@ export const Step8Sheet = ({ character, updateCharacter, onOpenInitiative, onSav
   const details = character.details ?? emptyCharacterDetails();
   const skills = proficientSkills(character);
   const bg = character.background ? BACKGROUNDS_BY_NAME[character.background] : null;
+  const allSpells = character.spells ?? [];
+  const cantrips = allSpells.filter((s) => s.level === 0);
+  const leveledSpells = allSpells.filter((s) => s.level !== 0);
 
   const updateDetails = (patch: Partial<CharacterDetails>) => {
     updateCharacter({ details: { ...details, ...patch } });
@@ -224,6 +227,41 @@ export const Step8Sheet = ({ character, updateCharacter, onOpenInitiative, onSav
               ))}
           </div>
         )}
+      </div>
+
+      <div className="p-6 border-t border-slate-800">
+        <h3 className="text-slate-400 uppercase text-xs tracking-wider mb-3">Spells</h3>
+        <div className="space-y-3">
+          <div>
+            <h4 className="text-xs text-slate-500 mb-1.5">Cantrips</h4>
+            {cantrips.length === 0 ? (
+              <p className="text-slate-500 italic text-sm">No cantrips.</p>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {cantrips.map((spell) => (
+                  <span key={spell.id} className="bg-slate-800 border border-slate-700 text-slate-300 py-1 px-3 rounded-full text-sm">
+                    {spell.name || 'Unnamed cantrip'}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+          <div>
+            <h4 className="text-xs text-slate-500 mb-1.5">Spells</h4>
+            {leveledSpells.length === 0 ? (
+              <p className="text-slate-500 italic text-sm">No spells.</p>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {leveledSpells.map((spell) => (
+                  <span key={spell.id} className="bg-slate-800 border border-slate-700 text-slate-300 py-1 px-3 rounded-full text-sm">
+                    {spell.name || 'Unnamed spell'}
+                    {spell.prepared && <span className="text-accent-400"> (prepared)</span>}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       <div className="p-6 border-t border-slate-800 space-y-4">
