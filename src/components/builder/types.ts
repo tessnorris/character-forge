@@ -11,6 +11,7 @@ export const STEPS = [
   { n: 3, label: 'Species' },
   { n: 4, label: 'Background' },
   { n: 5, label: 'Abilities' },
-  { n: 6, label: 'Equipment' },
-  { n: 7, label: 'Summary' },
+  { n: 6, label: 'Spells' },
+  { n: 7, label: 'Equipment' },
+  { n: 8, label: 'Summary' },
 ] as const;

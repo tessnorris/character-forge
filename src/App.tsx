@@ -6,8 +6,9 @@ import { Step2Class } from './components/builder/Step2Class';
 import { Step3Species } from './components/builder/Step3Species';
 import { Step4Background } from './components/builder/Step4Background';
 import { Step5Roller } from './components/builder/Step5Roller';
-import { Step6Equipment } from './components/builder/Step6Equipment';
-import { Step7Sheet } from './components/builder/Step7Sheet';
+import { Step6Spells } from './components/builder/Step6Spells';
+import { Step7Equipment } from './components/builder/Step7Equipment';
+import { Step8Sheet } from './components/builder/Step8Sheet';
 import { InitiativeTracker } from './components/initiative/InitiativeTracker';
 import { RosterView } from './components/roster/RosterView';
 import { HomebrewView } from './components/homebrew/HomebrewView';
@@ -82,7 +83,7 @@ function App() {
     const entry = roster.find((c) => c.id === id);
     if (!entry) return;
     setCharacter(JSON.parse(JSON.stringify(entry)));
-    setStep(7);
+    setStep(8);
     setView('builder');
   };
 
@@ -142,7 +143,8 @@ function App() {
     3: speciesStepComplete(),
     4: !!character.background,
     5: !!character.baseScores,
-    6: !!character.equipmentPackageId,
+    6: true, // Spells — free-text and optional, never blocks progression
+    7: !!character.equipmentPackageId,
   };
   const canEnter = (s: number) => {
     for (let i = 1; i < s; i++) if (!completed[i]) return false;
@@ -195,9 +197,11 @@ function App() {
       case 5:
         return <Step5Roller character={character} updateCharacter={updateCharacter} />;
       case 6:
-        return <Step6Equipment character={character} updateCharacter={updateCharacter} onJump={setStep} userContent={userContent} />;
+        return <Step6Spells character={character} updateCharacter={updateCharacter} />;
       case 7:
-        return <Step7Sheet character={character} updateCharacter={updateCharacter} onOpenInitiative={openInitiative} onSave={saveCharacter} />;
+        return <Step7Equipment character={character} updateCharacter={updateCharacter} onJump={setStep} userContent={userContent} />;
+      case 8:
+        return <Step8Sheet character={character} updateCharacter={updateCharacter} onOpenInitiative={openInitiative} onSave={saveCharacter} />;
       default:
         return null;
     }
@@ -248,14 +252,14 @@ function App() {
                 <Stepper step={step} canEnter={canEnter} onJump={setStep} />
               </div>
               {/* Step content — fixed area; tall steps scroll inside */}
-              <div className="flex-1 min-h-0">{step === 6 ? renderStep() : <div className="h-full overflow-y-auto pr-1">{renderStep()}</div>}</div>
+              <div className="flex-1 min-h-0">{step === 7 ? renderStep() : <div className="h-full overflow-y-auto pr-1">{renderStep()}</div>}</div>
 
               {/* Footer nav — always visible at the bottom */}
               <div className="shrink-0 flex justify-between items-center pt-4">
                 <Button variant="ghost" onClick={() => setStep((s) => Math.max(1, s - 1))} disabled={step === 1}>
                   ← Back
                 </Button>
-                {step < 7 ? (
+                {step < 8 ? (
                   <Button onClick={() => setStep((s) => s + 1)} disabled={!completed[step]}>
                     {completed[step] ? 'Next →' : 'Complete this step →'}
                   </Button>

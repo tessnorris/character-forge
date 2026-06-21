@@ -6,12 +6,12 @@ import { formatCurrency } from '../../engine/derive';
 import type { UserContent } from '../../types/content';
 import type { StepProps } from './types';
 
-interface Step6Props extends StepProps {
+interface Step7Props extends StepProps {
   onJump: (step: number) => void;
   userContent: UserContent;
 }
 
-export const Step6Equipment = ({ character, updateCharacter, onJump, userContent }: Step6Props) => {
+export const Step7Equipment = ({ character, updateCharacter, onJump, userContent }: Step7Props) => {
   const classObj = CLASSES_DATA.find((c) => c.name === character.charClass);
   const pkg = classObj ? classObj.packages.find((p) => p.id === character.equipmentPackageId) : undefined;
   const shopItems = getPurchasableEquipment(userContent);
