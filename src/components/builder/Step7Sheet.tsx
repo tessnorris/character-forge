@@ -7,7 +7,8 @@ import { SPECIES_DATA } from '../../data/species';
 import { BACKGROUNDS_BY_NAME } from '../../data/backgrounds';
 import { finalScores, proficientSkills } from '../../engine/derive';
 import { emptyCharacterDetails } from '../../types/character';
-import type { Character, CharacterDetails } from '../../types/character';
+import type { Character, CharacterDetails, SpellEntry } from '../../types/character';
+import { uid } from '../../engine/dice';
 import type { ReactNode } from 'react';
 
 interface Step7Props {
@@ -52,15 +53,84 @@ const TextAreaField = ({
   );
 };
 
+const SpellRow = ({
+  spell,
+  onChange,
+  onRemove,
+}: {
+  spell: SpellEntry;
+  onChange: (patch: Partial<SpellEntry>) => void;
+  onRemove: () => void;
+}) => {
+  const nameId = useId();
+  const levelId = useId();
+  return (
+    <div className="flex items-center gap-2 bg-slate-800/60 border border-slate-700 rounded-lg p-2.5">
+      <label htmlFor={nameId} className="sr-only">
+        Spell name
+      </label>
+      <input
+        id={nameId}
+        type="text"
+        value={spell.name}
+        onChange={(e) => onChange({ name: e.target.value })}
+        placeholder="Spell name"
+        className="flex-1 min-w-0 bg-slate-900 border border-slate-700 text-white rounded-lg px-3 py-1.5 text-sm focus:border-accent-500 outline-none"
+      />
+      <label htmlFor={levelId} className="sr-only">
+        Spell level
+      </label>
+      <input
+        id={levelId}
+        type="number"
+        min={0}
+        max={9}
+        value={spell.level ?? ''}
+        onChange={(e) => onChange({ level: e.target.value === '' ? undefined : Number(e.target.value) })}
+        placeholder="Lvl"
+        className="w-16 shrink-0 bg-slate-900 border border-slate-700 text-white rounded-lg px-2 py-1.5 text-sm text-center focus:border-accent-500 outline-none"
+      />
+      <label className="flex items-center gap-1.5 shrink-0 text-xs text-slate-400 select-none">
+        <input
+          type="checkbox"
+          checked={spell.prepared ?? false}
+          onChange={(e) => onChange({ prepared: e.target.checked })}
+          className="accent-accent-500"
+        />
+        Prepared
+      </label>
+      <button
+        type="button"
+        onClick={onRemove}
+        aria-label={`Remove ${spell.name || 'spell'}`}
+        className="shrink-0 text-slate-500 hover:text-red-400 px-1.5 py-1 text-sm"
+      >
+        ✕
+      </button>
+    </div>
+  );
+};
+
 export const Step7Sheet = ({ character, updateCharacter, onOpenInitiative, onSave }: Step7Props) => {
   const scores = finalScores(character);
   const rolled = !!character.baseScores;
   const details = character.details ?? emptyCharacterDetails();
   const skills = proficientSkills(character);
   const bg = character.background ? BACKGROUNDS_BY_NAME[character.background] : null;
+  const spells = character.spells ?? [];
 
   const updateDetails = (patch: Partial<CharacterDetails>) => {
     updateCharacter({ details: { ...details, ...patch } });
+  };
+
+  const addSpell = () => {
+    updateCharacter({ spells: [...spells, { id: uid(), name: '' }] });
+  };
+  const updateSpell = (id: string, patch: Partial<SpellEntry>) => {
+    updateCharacter({ spells: spells.map((s) => (s.id === id ? { ...s, ...patch } : s)) });
+  };
+  const removeSpell = (id: string) => {
+    updateCharacter({ spells: spells.filter((s) => s.id !== id) });
   };
 
   const classObj = CLASSES_DATA.find((c) => c.name === character.charClass);
@@ -222,6 +292,31 @@ export const Step7Sheet = ({ character, updateCharacter, onOpenInitiative, onSav
                   {name} <span className="text-slate-500">×{qty}</span>
                 </span>
               ))}
+          </div>
+        )}
+      </div>
+
+      <div className="p-6 border-t border-slate-800 space-y-3">
+        <div className="flex items-center justify-between">
+          <h3 className="text-slate-400 uppercase text-xs tracking-wider">Spells</h3>
+          <Button variant="ghost" onClick={addSpell}>
+            + Add Spell
+          </Button>
+        </div>
+        {spells.length === 0 ? (
+          <p className="text-slate-500 italic text-sm">
+            No spells yet — just type in names; level and prepared are optional.
+          </p>
+        ) : (
+          <div className="space-y-2">
+            {spells.map((spell) => (
+              <SpellRow
+                key={spell.id}
+                spell={spell}
+                onChange={(patch) => updateSpell(spell.id, patch)}
+                onRemove={() => removeSpell(spell.id)}
+              />
+            ))}
           </div>
         )}
       </div>

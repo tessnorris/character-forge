@@ -43,6 +43,19 @@ export const emptyCharacterDetails = (): CharacterDetails => ({
   notes: '',
 });
 
+/** One entry in a character's free-text spell list — just a name, with
+ * optional level and prepared flags. Deliberately not tied to any spell
+ * compendium/catalog: the user types the name in directly, the same way
+ * CustomEquipmentItem lets a player record gear without it being in the
+ * shop catalog. `id` is for React keys and row add/remove, not a lookup
+ * key into any data file. */
+export interface SpellEntry {
+  id: string;
+  name: string;
+  level?: number; // 0 for cantrip, 1-9 for leveled spells; omitted if not tracked
+  prepared?: boolean;
+}
+
 export interface Character {
   id: string;
 
@@ -83,9 +96,11 @@ export interface Character {
   equipmentPackageId: string | null;
   purchasedItems: Record<string, number>; // shop item name -> quantity
 
-  // Step 7 — Free-text flavor fields. Optional so older persisted/imported
-  // characters (saved before this field existed) still parse; components
-  // reading this should fall back to emptyCharacterDetails().
+  // Step 7 — Spell list (simple name entry, no compendium) and free-text
+  // flavor fields. Both optional so older persisted/imported characters
+  // (saved before these fields existed) still parse; components reading
+  // them should fall back to an empty array / emptyCharacterDetails().
+  spells?: SpellEntry[];
   details?: CharacterDetails;
 
   savedAt?: number; // epoch ms, set when saved to the roster
